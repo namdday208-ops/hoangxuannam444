@@ -1,0 +1,2024 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ViVu Fresh & Merchant v2.1 - Live Commerce & Chợ Đặc Sản Tuyến Tỉnh</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,400;0,500;0,600;0,700;0,800;1,500&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Be Vietnam Pro"', 'sans-serif'],
+          },
+          colors: {
+            vivu: {
+              teal: '#00897B',
+              tealDark: '#00695C',
+              tealDeep: '#004D40',
+              mint: '#E0F7FA',
+              mintSoft: '#F0FDFA',
+              orange: '#FF7043',
+              orangeBright: '#FF9800',
+            }
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Be Vietnam Pro', sans-serif;
+      background-color: #F0FDFA;
+      color: #0F172A;
+      overflow-x: hidden;
+      margin: 0;
+    }
+
+    .vivu-bg-animated {
+      background: linear-gradient(-45deg, #E0F7FA, #F0FDFA, #FFF3E0, #E8F5E9, #E0F2F1);
+      background-size: 400% 400%;
+      animation: auroraShift 18s ease infinite;
+      position: relative;
+    }
+    @keyframes auroraShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .floating-blob {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(70px);
+      z-index: 0;
+      pointer-events: none;
+      animation: floatBlob 14s ease-in-out infinite alternate;
+    }
+    @keyframes floatBlob {
+      0% { transform: translate(0px, 0px) scale(1); }
+      50% { transform: translate(35px, -28px) scale(1.1); }
+      100% { transform: translate(-25px, 30px) scale(0.94); }
+    }
+
+    .hero-banner-animated {
+      background: linear-gradient(125deg, #004D40 0%, #00695C 42%, #00897B 78%, #005B4F 100%);
+      background-size: 250% 250%;
+      animation: heroGradientFlow 12s ease infinite;
+    }
+    @keyframes heroGradientFlow {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .sheen-sweep {
+      position: relative;
+      overflow: hidden;
+    }
+    .sheen-sweep::after {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -75%;
+      width: 50%;
+      height: 200%;
+      background: linear-gradient(
+        to right,
+        rgba(255, 255, 255, 0) 0%,
+        rgba(255, 255, 255, 0.34) 50%,
+        rgba(255, 255, 255, 0) 100%
+      );
+      transform: rotate(25deg);
+      animation: sheenMove 4.2s ease-in-out infinite;
+      pointer-events: none;
+    }
+    @keyframes sheenMove {
+      0% { left: -75%; }
+      35% { left: 135%; }
+      100% { left: 135%; }
+    }
+
+    .tab-view {
+      animation: slideFadeIn 0.34s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    @keyframes slideFadeIn {
+      from { opacity: 0; transform: translateY(14px) scale(0.985); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    @keyframes radarPing {
+      0% { transform: scale(0.8); opacity: 0.85; }
+      100% { transform: scale(2.4); opacity: 0; }
+    }
+    .gps-ping { animation: radarPing 1.8s cubic-bezier(0, 0, 0.2, 1) infinite; }
+
+    .product-card {
+      transition: transform 0.22s ease, box-shadow 0.22s ease;
+    }
+    .product-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 14px 28px -8px rgba(0, 137, 123, 0.18);
+    }
+
+    @keyframes floatHeart {
+      0% { transform: translateY(0) scale(0.7); opacity: 1; }
+      100% { transform: translateY(-130px) scale(1.35); opacity: 0; }
+    }
+    .floating-heart {
+      position: absolute;
+      bottom: 24px;
+      right: 24px;
+      font-size: 22px;
+      pointer-events: none;
+      animation: floatHeart 1.4s ease-out forwards;
+    }
+
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(0, 137, 123, 0.28); border-radius: 999px; }
+  </style>
+</head>
+<body class="vivu-bg-animated min-h-screen">
+
+  <!-- Ambient Blobs -->
+  <div class="floating-blob w-80 h-80 bg-teal-300/30 top-[-60px] left-[-60px]"></div>
+  <div class="floating-blob w-96 h-96 bg-orange-300/25 bottom-[10%] right-[-80px]" style="animation-delay: -5s;"></div>
+
+  <!-- TOAST NOTIFICATION -->
+  <div id="toastContainer" class="fixed top-4 right-4 z-[95] flex flex-col gap-2 max-w-sm w-[calc(100%-2rem)] pointer-events-none"></div>
+
+  <!-- ==================== MAIN APP SHELL ==================== -->
+  <div id="appShell" class="relative z-10 max-w-6xl mx-auto min-h-screen flex flex-col md:flex-row shadow-2xl bg-white/85 backdrop-blur-xl border-x border-teal-100/80">
+
+    <!-- DESKTOP SIDEBAR NAV -->
+    <aside class="hidden md:flex md:w-64 lg:w-72 flex-col justify-between bg-gradient-to-b from-[#004D40] via-[#00695C] to-[#00382E] text-white p-5 shrink-0">
+      <div>
+        <!-- Brand Header -->
+        <div class="flex items-center gap-3 pb-5 border-b border-white/15">
+          <div id="sidebarLogoContainer" class="w-12 h-12 shrink-0"></div>
+          <div>
+            <div class="flex items-center gap-1 font-extrabold text-xl tracking-tight">
+              <span>VIV</span><span class="text-[#FF8A65]">U</span>
+              <span class="text-[10px] px-2 py-0.5 rounded-md bg-[#FF7043] text-white uppercase font-black tracking-wider">Fresh</span>
+            </div>
+            <p class="text-[11px] text-teal-200 font-medium">Live & Chợ Đặc Sản Tuyến Tỉnh</p>
+          </div>
+        </div>
+
+        <!-- 2-in-1 Role Switcher: Buyer vs Merchant -->
+        <div class="mt-4 bg-white/10 rounded-2xl p-2.5 backdrop-blur-sm border border-white/15 space-y-2">
+          <div class="flex items-center justify-between text-[11px] text-teal-200">
+            <span>Chế độ sử dụng:</span>
+            <span id="dbConnectionBadge" class="px-2 py-0.5 rounded-full bg-emerald-500/30 border border-emerald-300/40 text-emerald-200 text-[10px] font-bold">● Cloud Ready</span>
+          </div>
+          <div class="grid grid-cols-2 gap-1 bg-black/25 p-1 rounded-xl text-[11px] font-extrabold">
+            <button id="roleBtn-buyer" onclick="switchFreshRole('buyer')" class="py-1.5 rounded-lg bg-[#FF7043] text-white shadow">🛒 Khách mua</button>
+            <button id="roleBtn-merchant" onclick="switchFreshRole('merchant')" class="py-1.5 rounded-lg text-teal-100 hover:bg-white/10">🏪 Chủ vựa</button>
+          </div>
+          <div class="text-xs font-bold text-white flex items-center gap-2 pt-0.5">
+            <span>🦐</span>
+            <span class="truncate" id="activeRoleIdentity">Khách: Minh Anh • 1.250 ViVu Xu</span>
+          </div>
+        </div>
+
+        <!-- Navigation Menu -->
+        <nav class="mt-5 space-y-2">
+          <button onclick="switchTab('market')" data-tab="market" class="nav-btn w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl text-sm font-bold transition-all bg-white text-[#00695C] shadow-md">
+            <span class="text-lg">🧺</span>
+            <span>Chợ Đặc Sản Theo Chuyến</span>
+          </button>
+          <button onclick="switchTab('live')" data-tab="live" class="nav-btn w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl text-sm font-semibold transition-all text-teal-100 hover:bg-white/10">
+            <span class="text-lg">📡</span>
+            <span>Live Tại Vựa & Video Ngắn</span>
+            <span id="sidebarLivePill" class="ml-auto bg-rose-500 text-white text-[10px] px-2 py-0.5 rounded-full font-extrabold animate-pulse">LIVE</span>
+          </button>
+          <button onclick="switchTab('merchant')" data-tab="merchant" class="nav-btn w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl text-sm font-semibold transition-all text-teal-100 hover:bg-white/10">
+            <span class="text-lg">📦</span>
+            <span>Trạm Chủ Vựa & Đẩy Xe</span>
+            <span id="sidebarOrdersBadge" class="ml-auto bg-[#FF7043] text-white text-xs px-2 py-0.5 rounded-full">3</span>
+          </button>
+          <button onclick="switchTab('tracking')" data-tab="tracking" class="nav-btn w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl text-sm font-semibold transition-all text-teal-100 hover:bg-white/10">
+            <span class="text-lg">🚐</span>
+            <span>Theo Dõi Hàng & Đối Soát</span>
+          </button>
+        </nav>
+      </div>
+
+      <!-- Ecosystem Cross-Link Card -->
+      <div class="bg-gradient-to-r from-[#FF7043] to-[#FF9800] rounded-2xl p-4 text-white shadow-lg mt-4 sheen-sweep space-y-1.5">
+        <div class="flex items-center justify-between text-xs font-semibold opacity-95">
+          <span>Ví Hệ Sinh Thái ViVu</span>
+          <span>🪙 Xu chung</span>
+        </div>
+        <div class="text-2xl font-extrabold" id="sidebarVivuXu">1.250 Xu</div>
+        <div class="text-[10px] text-orange-100 border-t border-white/20 pt-1.5">
+          Đặt đặc sản trên Live tặng ngay mã giảm <b>30.000đ</b> vé xe Limousine!
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT AREA -->
+    <main class="flex-1 flex flex-col min-w-0 pb-24 md:pb-6">
+
+      <!-- TOP HEADER BAR -->
+      <header class="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-teal-100 px-4 py-2.5 flex items-center justify-between gap-2">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <div id="mobileLogoContainer" class="w-10 h-10 md:hidden shrink-0"></div>
+          <div class="min-w-0">
+            <div class="flex flex-wrap items-center gap-1.5 text-[11px] font-semibold">
+              <span class="relative flex h-3 w-3 items-center justify-center shrink-0">
+                <span class="gps-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-600"></span>
+              </span>
+              <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-extrabold">
+                🚐 Khớp xe tuyến trong ngày
+              </span>
+              <span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 text-[10px] font-extrabold" id="nextBusDepartureChip">
+                ⏳ Chuyến QN → HN chạy sau: 42p
+              </span>
+              <button onclick="openSupabaseConfigModal()" class="underline text-[#00897B] hover:text-teal-800 font-bold">⚙️ Cloud</button>
+            </div>
+            <p class="text-xs sm:text-sm font-bold text-slate-800 truncate mt-0.5">
+              ViVu Fresh: Xem Live tại vựa • Quay thực tế • Giao tươi theo chuyến xe
+            </p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2 shrink-0">
+          <button onclick="switchTab('live')" class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-extrabold transition">
+            <span class="w-2 h-2 rounded-full bg-rose-600 animate-ping"></span>
+            <span>Phòng Live</span>
+          </button>
+          <button onclick="openPostProductModal()" class="hidden sm:flex items-center gap-1 px-3 py-1.5 rounded-full bg-teal-50 hover:bg-teal-100 text-[#00695C] border border-teal-200 text-xs font-extrabold transition">
+            <span>+ Đăng ảnh/video</span>
+          </button>
+          <button onclick="openCartDrawerModal()" class="relative bg-gradient-to-r from-[#FF7043] to-[#FF9800] hover:brightness-105 text-white px-3.5 py-1.5 rounded-full text-xs font-extrabold shadow-sm transition flex items-center gap-1.5">
+            <span>🛒</span>
+            <span>Giỏ hàng</span>
+            <span id="cartCountBadge" class="px-1.5 py-0.2 rounded-full bg-white text-[#FF7043] font-black text-[11px]">2</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- ==================== TAB 1: CHỢ ĐẶC SẢN THEO CHUYẾN XE (REAL PHOTOS & VIDEO BADGES) ==================== -->
+      <section id="tab-market" class="tab-view p-4 sm:p-6 space-y-5">
+
+        <!-- HERO ROUTE COMMERCE BANNER -->
+        <div class="hero-banner-animated rounded-3xl p-5 sm:p-6 text-white shadow-xl space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div class="max-w-xl">
+              <span class="inline-flex items-center gap-1.5 bg-white/15 backdrop-blur-md border border-white/25 px-3 py-1 rounded-full text-xs font-bold">
+                🦐 Ảnh thật 100% tại bến & nhà vườn • Giao khoang lạnh 2–4 tiếng
+              </span>
+              <h1 class="text-xl sm:text-2xl font-extrabold mt-2 leading-snug">
+                Đặc Sản Tươi Ngon Từ Vựa Lên Thẳng Xe Tuyến Trong Ngày
+              </h1>
+              <p class="text-xs sm:text-sm text-teal-100 mt-1">
+                Xem video quay thực tế mẻ hàng sáng nay hoặc vào Phòng Live chốt đơn trước giờ xe Limousine xuất bến!
+              </p>
+            </div>
+
+            <!-- Live Countdown Box -->
+            <div class="bg-black/25 backdrop-blur-md rounded-2xl p-3.5 border border-white/20 text-center min-w-[175px]">
+              <div class="text-[10px] uppercase tracking-wider text-teal-200 font-bold">Chuyến kế tiếp chốt đơn</div>
+              <div class="text-2xl font-black text-amber-300 font-mono mt-0.5" id="heroCountdownTimer">00:42:18</div>
+              <div class="text-[11px] text-white font-semibold mt-0.5">Xe 29B-889.68 • Hạ Long → HN</div>
+            </div>
+          </div>
+
+          <!-- Route Corridor Filter Pills -->
+          <div class="space-y-1.5 pt-1">
+            <div class="text-[11px] font-bold text-teal-100">🛣️ Lọc đặc sản theo trục chuyến xe đang mở nhận hàng:</div>
+            <div id="routeCorridorTabs" class="flex flex-wrap gap-2"></div>
+          </div>
+        </div>
+
+        <!-- IN-TRIP PASSENGER PERK BANNER ("GỬI QUÀ THEO GHẾ") -->
+        <div class="p-4 rounded-3xl bg-gradient-to-r from-amber-50 via-orange-50 to-teal-50 border-2 border-orange-200/80 flex flex-wrap items-center justify-between gap-3 shadow-sm">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#FF7043] to-[#FF9800] text-white flex items-center justify-center text-2xl shadow shrink-0">
+              🎁
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="px-2 py-0.5 rounded bg-[#FF7043] text-white text-[10px] font-extrabold uppercase">Đặc quyền Hành khách ViVu</span>
+                <span class="text-xs font-extrabold text-amber-900">Đặt quà mang về • Giao thẳng ra ghế xe!</span>
+              </div>
+              <p class="text-xs text-slate-600 mt-0.5">
+                Đang đi du lịch Hạ Long / Yên Tử? Đặt trước đặc sản tại đây, nhà vườn đóng thùng xốp và giao tận tay tài xế chuyến về — <b>Miễn phí cước gửi xe</b>!
+              </p>
+            </div>
+          </div>
+          <label class="flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-white border border-orange-200 cursor-pointer shadow-xs text-xs font-extrabold text-slate-800">
+            <input type="checkbox" id="deliverToSeatToggle" onchange="toggleDeliverToSeatMode()" class="accent-[#FF7043] w-4 h-4" />
+            <span>💺 Giao lên ghế xe của tôi (#VV-88410)</span>
+          </label>
+        </div>
+
+        <!-- CATEGORY CHIPS & SEARCH -->
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div class="flex flex-wrap gap-2 text-xs font-bold" id="categoryFilterBar">
+            <button onclick="filterProductsByCategory('all')" data-cat="all" class="cat-btn px-3.5 py-2 rounded-xl bg-[#00897B] text-white shadow-sm">🌟 Tất cả đặc sản</button>
+            <button onclick="filterProductsByCategory('seafood')" data-cat="seafood" class="cat-btn px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-teal-50">🦐 Hải sản tươi sống</button>
+            <button onclick="filterProductsByCategory('fruit')" data-cat="fruit" class="cat-btn px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-teal-50">🥭 Trái cây tại vườn</button>
+            <button onclick="filterProductsByCategory('specialty')" data-cat="specialty" class="cat-btn px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-teal-50">🥡 Đặc sản chế biến</button>
+          </div>
+
+          <div class="relative w-full sm:w-64">
+            <input id="productSearchInput" type="text" oninput="renderProductGrid()" placeholder="Tìm chả mực, tôm sú, na dai..." class="w-full pl-9 pr-3.5 py-2 rounded-xl bg-white border border-slate-200 text-xs font-semibold outline-none focus:border-[#00897B]" />
+            <span class="absolute left-3 top-2 text-slate-400 text-sm">🔍</span>
+          </div>
+        </div>
+
+        <!-- PRODUCT GRID WITH REAL PHOTOS & VIDEO PREVIEW BUTTONS -->
+        <div id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+      </section>
+
+      <!-- ==================== TAB 2: IN-APP LIVE STREAMING & SHORT VIDEOS (NO EXTERNAL PLATFORMS) ==================== -->
+      <section id="tab-live" class="tab-view hidden p-4 sm:p-6 space-y-5">
+
+        <!-- NATIVE IN-APP LIVE STREAM STUDIO & VIEWER -->
+        <div class="bg-slate-950 text-white rounded-3xl p-4 sm:p-6 shadow-2xl border border-teal-500/30 space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <div class="flex items-center gap-2">
+                <span id="liveStreamStatusBadge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-600 text-white text-[11px] font-extrabold">
+                  <span class="w-2 h-2 rounded-full bg-white animate-ping"></span>
+                  <span>PHÁT LIVE TRỰC TIẾP TRÊN VIVU</span>
+                </span>
+                <span class="px-2.5 py-1 rounded-full bg-white/10 text-teal-200 text-[11px] font-bold" id="liveViewerCount">👁️ 148 người đang xem</span>
+              </div>
+              <h2 class="text-lg sm:text-xl font-extrabold mt-1.5" id="liveRoomTitle">
+                🔴 Khui Thùng Hải Sản Sáng Sớm Tại Bến Đoan Hạ Long — Chốt Đơn Kịp Chuyến 10:00!
+              </h2>
+              <p class="text-xs text-slate-300">Phát sóng trực tiếp bằng Camera trên App ViVu Fresh (Không qua nền tảng trung gian)</p>
+            </div>
+
+            <!-- Merchant Native Camera Broadcast Controls -->
+            <div class="flex flex-wrap items-center gap-2">
+              <button id="startNativeLiveBtn" onclick="startNativeCameraLive()" class="sheen-sweep px-4 py-2.5 rounded-2xl bg-gradient-to-r from-rose-600 to-[#FF7043] hover:brightness-110 text-white text-xs font-extrabold shadow-lg flex items-center gap-1.5">
+                <span>📹</span>
+                <span>Bật Camera Phát Live Ngay</span>
+              </button>
+              <button id="stopNativeLiveBtn" onclick="stopNativeCameraLive()" class="hidden px-4 py-2.5 rounded-2xl bg-slate-800 hover:bg-slate-700 border border-slate-600 text-rose-300 text-xs font-extrabold">
+                ⏹️ Dừng Phát Live
+              </button>
+            </div>
+          </div>
+
+          <!-- Split Live Stage: Video/Camera Player + Real-time Live Chat & Pinned Product -->
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+            <!-- Left 7 Cols: Native Video Stage -->
+            <div id="liveStageContainer" class="lg:col-span-7 relative rounded-2xl overflow-hidden bg-slate-900 border border-white/15 aspect-video flex items-center justify-center">
+              <!-- Live Camera Stream Element (Hidden until merchant turns on camera) -->
+              <video id="nativeLiveCameraVideo" autoplay playsinline muted class="hidden w-full h-full object-cover"></video>
+
+              <!-- Default Simulated Live Broadcast Preview (When camera not active) -->
+              <div id="simulatedLiveBroadcast" class="relative w-full h-full">
+                <img src="https://images.unsplash.com/photo-1559737558-2f5a35f4523b?auto=format&fit=crop&w=1000&q=80" alt="Live Hải Sản Hạ Long" class="w-full h-full object-cover opacity-85" />
+                <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-black/40"></div>
+
+                <div class="absolute top-3 left-3 flex items-center gap-2 bg-black/55 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/15 text-[11px]">
+                  <span class="font-bold text-amber-300">🏪 Vựa Hải Sản Cô Tám</span>
+                  <span class="text-slate-300">• Bến Đoan, Hạ Long</span>
+                </div>
+
+                <div class="absolute bottom-3 left-3 right-3 flex flex-wrap items-end justify-between gap-2">
+                  <div class="max-w-sm">
+                    <span class="px-2 py-0.5 rounded bg-emerald-500/90 text-white text-[10px] font-extrabold">🎥 Luồng Live Trực Tiếp Tại Quầy</span>
+                    <p class="text-xs text-white font-semibold mt-1">
+                      "Mực nang tươi vừa cập bến, giã tay trực tiếp trước ống kính. Khách bấm Giỏ Hàng Ghim bên dưới để giữ suất lên xe 29B-889.68 nhé!"
+                    </p>
+                  </div>
+                  <button onclick="spawnLiveHeart()" class="px-3.5 py-2 rounded-full bg-rose-600/90 hover:bg-rose-500 text-white text-xs font-extrabold shadow-lg active:scale-95 transition">
+                    ❤️ Thả tim (<span id="liveHeartCounter">642</span>)
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right 5 Cols: Pinned Live Deal + Real-time Chat -->
+            <div class="lg:col-span-5 flex flex-col justify-between bg-slate-900/90 rounded-2xl border border-white/15 p-3.5 space-y-3">
+              <!-- Pinned Product Card inside Live Room -->
+              <div class="p-3 rounded-2xl bg-gradient-to-r from-[#00695C] to-[#004D40] border border-teal-400/30 space-y-2">
+                <div class="flex items-center justify-between text-[10px] font-extrabold text-amber-300 uppercase">
+                  <span>📌 Sản phẩm đang ghim trên Live</span>
+                  <span id="pinnedLiveStock">Còn 14 khay</span>
+                </div>
+                <div class="flex items-center gap-2.5">
+                  <img id="pinnedLiveImg" src="https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?auto=format&fit=crop&w=300&q=80" alt="Chả mực" class="w-14 h-14 rounded-xl object-cover border border-white/20 shrink-0" />
+                  <div class="min-w-0 flex-1">
+                    <div class="font-extrabold text-xs text-white truncate" id="pinnedLiveName">Chả mực giã tay Hạ Long loại 1 (1kg)</div>
+                    <div class="text-sm font-black text-amber-300 mt-0.5" id="pinnedLivePrice">420.000đ</div>
+                  </div>
+                  <button onclick="quickOrderFromLive()" class="sheen-sweep px-3 py-2 rounded-xl bg-[#FF7043] hover:bg-orange-500 text-white text-xs font-extrabold shrink-0 shadow">
+                    Chốt đơn
+                  </button>
+                </div>
+                <!-- Switch Pinned Product Selector for Merchant -->
+                <div class="flex items-center gap-1.5 pt-1 border-t border-white/15 text-[11px]">
+                  <span class="text-teal-200 shrink-0">Đổi SP ghim:</span>
+                  <select id="pinProductSelector" onchange="changePinnedLiveProduct(this.value)" class="w-full bg-black/30 text-white border border-white/20 rounded-lg px-2 py-1 text-[11px] font-semibold outline-none"></select>
+                </div>
+              </div>
+
+              <!-- Real-time Chat Messages -->
+              <div id="liveChatFeed" class="h-44 overflow-y-auto space-y-2 pr-1 text-xs"></div>
+
+              <!-- Send Chat Input -->
+              <form onsubmit="sendLiveChatMessage(event)" class="flex gap-2">
+                <input id="liveChatInput" type="text" placeholder="Hỏi chủ vựa hoặc gõ 'Chốt 1kg'..." class="flex-1 px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-white text-xs outline-none focus:border-teal-400" />
+                <button type="submit" class="px-3.5 py-2 rounded-xl bg-[#00897B] hover:bg-teal-600 text-white text-xs font-extrabold">
+                  Gửi
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- PRE-RECORDED & EDITED SHORT VIDEOS FEED (REELS / SHORTS) -->
+        <div class="bg-white/95 rounded-3xl p-5 shadow-md border border-teal-100 space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <span class="px-2.5 py-0.5 rounded-full bg-teal-100 text-[#00695C] text-[10px] font-extrabold uppercase">🎬 Video ngắn quay & edit sẵn tại vựa</span>
+              <h2 class="text-lg font-extrabold text-slate-800 mt-1">Video Thực Tế Thu Hoạch & Đóng Thùng Hôm Nay</h2>
+              <p class="text-xs text-slate-500">Chủ vựa quay clip ngắn, chỉnh sửa trực quan và tải thẳng lên ViVu Fresh để giới thiệu độ tươi của đặc sản</p>
+            </div>
+            <button onclick="openPostProductModal()" class="sheen-sweep px-4 py-2.5 rounded-2xl bg-gradient-to-r from-[#FF7043] to-[#FF9800] text-white text-xs font-extrabold shadow">
+              📤 Tải Ảnh Thật / Video Edit Sẵn Lên
+            </button>
+          </div>
+
+          <div id="harvestShowcaseFeed" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+        </div>
+      </section>
+
+      <!-- ==================== TAB 3: TRẠM CHỦ VỰA & ĐẨY ĐƠN SANG XE TUYẾN (MERCHANT DISPATCH) ==================== -->
+      <section id="tab-merchant" class="tab-view hidden p-4 sm:p-6 space-y-5">
+        <div class="hero-banner-animated rounded-3xl p-5 sm:p-6 text-white shadow-xl space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <span class="px-3 py-1 rounded-full bg-white/15 border border-white/25 text-xs font-bold">🏪 Vựa Hải Sản Cô Tám - Bến Đoan, Hạ Long</span>
+              <h2 class="text-lg sm:text-xl font-extrabold mt-2">Bảng Điều Hành Chủ Vựa & Ghép Xe Tuyến</h2>
+              <p class="text-xs text-teal-100">Đăng ảnh thật/video edit sẵn, bật Live bán hàng và đẩy đơn sang App Tài xế</p>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <button onclick="switchTab('live')" class="px-4 py-2.5 rounded-2xl bg-rose-600 hover:bg-rose-500 text-white font-extrabold text-xs shadow-lg">
+                📡 Vào Phòng Live
+              </button>
+              <button onclick="openPostProductModal()" class="sheen-sweep px-4 py-2.5 rounded-2xl bg-gradient-to-r from-[#FF7043] to-[#FF9800] text-white font-extrabold text-xs shadow-lg">
+                + Đăng SP (Ảnh / Video)
+              </button>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div class="bg-white/12 rounded-2xl p-3 border border-white/15">
+              <div class="text-[11px] text-teal-100">Doanh thu mẻ sáng nay</div>
+              <div class="text-xl font-extrabold text-emerald-300 mt-0.5" id="merchantRevenueKpi">1.880.000đ</div>
+            </div>
+            <div class="bg-white/12 rounded-2xl p-3 border border-white/15">
+              <div class="text-[11px] text-teal-100">Đơn chờ đẩy ra xe</div>
+              <div class="text-xl font-extrabold text-amber-300 mt-0.5" id="merchantPendingOrdersKpi">2 đơn</div>
+            </div>
+            <div class="bg-white/12 rounded-2xl p-3 border border-white/15">
+              <div class="text-[11px] text-teal-100">Xe tuyến đang nhận hàng</div>
+              <div class="text-xl font-extrabold mt-0.5">3 xe ViVu</div>
+            </div>
+            <div class="bg-white/12 rounded-2xl p-3 border border-white/15">
+              <div class="text-[11px] text-teal-100">Tỷ lệ giao tươi trong ngày</div>
+              <div class="text-xl font-extrabold text-orange-300 mt-0.5">99.4%</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Packaging Standard Checklist + Order Dispatch Queue -->
+        <div class="bg-white/95 rounded-3xl p-5 shadow-md border border-teal-100 space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <h3 class="font-extrabold text-base text-slate-800">📦 Danh Sách Đơn Đặt Hàng & Lệnh Gọi Xe Tuyến</h3>
+              <p class="text-xs text-slate-500">Bắt buộc xác nhận đóng thùng xốp kín chống mùi/chảy nước trước khi bàn giao cho xe Limousine</p>
+            </div>
+            <button onclick="simulateNewFreshOrder()" class="px-3 py-1.5 rounded-xl bg-teal-50 hover:bg-teal-100 text-[#00695C] border border-teal-200 text-xs font-extrabold">
+              ⚡ Test khách mới đặt hàng
+            </button>
+          </div>
+
+          <div id="merchantOrdersQueue" class="space-y-3"></div>
+        </div>
+      </section>
+
+      <!-- ==================== TAB 4: THEO DÕI HÀNH TRÌNH HÀNG & ĐỐI SOÁT COD / CƯỚC XE ==================== -->
+      <section id="tab-tracking" class="tab-view hidden p-4 sm:p-6 space-y-5">
+        <div class="bg-white/95 rounded-3xl p-5 shadow-md border border-teal-100 space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <h2 class="text-lg font-extrabold text-slate-800">🚐 Theo Dõi Kiện Hàng Trên Xe Tuyến & Minh Bạch Dòng Tiền</h2>
+              <p class="text-xs text-slate-500">Đồng bộ vị trí GPS trực tiếp từ App Tài xế ViVu & tách bạch Tiền hàng của Vựa vs Cước vận chuyển</p>
+            </div>
+            <span class="px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-extrabold">● Đồng bộ 3 App Real-time</span>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+            <div class="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200">
+              <div class="text-emerald-800 font-semibold">Tiền hàng thực nhận của Chủ vựa</div>
+              <div class="text-xl font-extrabold text-emerald-900 mt-1" id="splitMerchantNet">1.880.000đ</div>
+              <div class="text-[11px] text-emerald-700 mt-0.5">Đã cọc online 100% chống bom hàng tươi</div>
+            </div>
+            <div class="p-3.5 rounded-2xl bg-teal-50 border border-teal-200">
+              <div class="text-[#00695C] font-semibold">Cước vận chuyển trả Nhà xe / Tài xế</div>
+              <div class="text-xl font-extrabold text-[#004D40] mt-1" id="splitDriverFreight">70.000đ</div>
+              <div class="text-[11px] text-[#00897B] mt-0.5">Tự động cộng vào doanh thu chuyến xe</div>
+            </div>
+            <div class="p-3.5 rounded-2xl bg-orange-50 border border-orange-200">
+              <div class="text-orange-800 font-semibold">Tiết kiệm cho khách nhận tại Hub</div>
+              <div class="text-xl font-extrabold text-[#FF7043] mt-1">Miễn phí ship nội đô</div>
+              <div class="text-[11px] text-orange-700 mt-0.5">Nhận tại 144 Xuân Thủy / Bến xe Mỹ Đình</div>
+            </div>
+          </div>
+
+          <div id="shipmentTrackingList" class="space-y-3"></div>
+        </div>
+      </section>
+    </main>
+
+    <!-- MOBILE BOTTOM NAVIGATION BAR -->
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-lg border-t border-teal-100 px-2 py-1.5 flex justify-around items-center shadow-[0_-4px_20px_rgba(0,0,0,0.06)]">
+      <button onclick="switchTab('market')" data-tab="market" class="mobile-nav-btn flex flex-col items-center py-1 px-3 rounded-xl text-[#00897B] font-bold">
+        <span class="text-xl">🧺</span>
+        <span class="text-[11px] mt-0.5">Chợ tuyến</span>
+      </button>
+      <button onclick="switchTab('live')" data-tab="live" class="mobile-nav-btn flex flex-col items-center py-1 px-3 rounded-xl text-slate-500 font-medium">
+        <span class="text-xl">📡</span>
+        <span class="text-[11px] mt-0.5">Live & Video</span>
+      </button>
+      <button onclick="switchTab('merchant')" data-tab="merchant" class="mobile-nav-btn flex flex-col items-center py-1 px-3 rounded-xl text-slate-500 font-medium">
+        <span class="text-xl">📦</span>
+        <span class="text-[11px] mt-0.5">Chủ vựa</span>
+      </button>
+      <button onclick="switchTab('tracking')" data-tab="tracking" class="mobile-nav-btn flex flex-col items-center py-1 px-3 rounded-xl text-slate-500 font-medium">
+        <span class="text-xl">🚐</span>
+        <span class="text-[11px] mt-0.5">Theo dõi</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- ==================== MODALS ==================== -->
+
+  <!-- MODAL 1: CART & CHECKOUT WITH BUS HUB / SEAT DELIVERY -->
+  <div id="cartDrawerModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-teal-100 space-y-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between">
+        <div>
+          <span class="px-2.5 py-0.5 rounded-full bg-orange-100 text-orange-800 text-[10px] font-extrabold">CHỐT ĐƠN GỬI XE TRONG NGÀY</span>
+          <h3 class="text-lg font-extrabold text-slate-800 mt-1">🛒 Giỏ Hàng Đặc Sản & Chọn Điểm Nhận</h3>
+        </div>
+        <button onclick="closeModal('cartDrawerModal')" class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 font-bold">✕</button>
+      </div>
+
+      <div id="cartItemsContainer" class="space-y-2.5 text-xs"></div>
+
+      <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2.5 text-xs">
+        <div class="font-extrabold text-slate-800">📍 Hình thức nhận hàng từ xe tuyến ViVu:</div>
+        <select id="deliveryModeSelect" onchange="recalculateCartTotals()" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-white font-semibold">
+          <option value="hub_free">🚏 Nhận tại Trạm dừng / Bến xe (144 Xuân Thủy) — Miễn phí ship nội đô</option>
+          <option value="on_seat">💺 Giao thẳng lên ghế xe tôi đang đi (#VV-88410) — Miễn phí cước xe</option>
+          <option value="door_delivery">🛵 Giao tận cửa nội thành Hà Nội (+25.000đ shipper chặng cuối)</option>
+        </select>
+
+        <div class="grid grid-cols-2 gap-2">
+          <input id="buyerNameInput" type="text" value="Minh Anh" placeholder="Tên người nhận" class="px-3 py-2 rounded-xl border border-slate-200 bg-white font-semibold" />
+          <input id="buyerPhoneInput" type="tel" value="0912 345 678" placeholder="SĐT người nhận" class="px-3 py-2 rounded-xl border border-slate-200 bg-white font-semibold" />
+        </div>
+      </div>
+
+      <div class="p-3 rounded-2xl bg-amber-50 border border-amber-200 text-[11px] text-amber-900 space-y-1">
+        <div class="font-extrabold">🛡️ Cam kết Hàng Tươi Sống & Chống Bom Hàng:</div>
+        <div>Hệ thống áp dụng <b>Thanh toán trước 100% qua VietQR / Ví ViVu</b> để nhà vườn đóng thùng xốp giữ lạnh ngay lập tức.</div>
+      </div>
+
+      <div class="p-3.5 rounded-2xl bg-teal-50/70 border border-teal-200 space-y-1 text-xs">
+        <div class="flex justify-between"><span>Tiền đặc sản (Trả chủ vựa):</span><b id="cartFoodSubtotal">0đ</b></div>
+        <div class="flex justify-between"><span>Cước thùng lạnh gửi xe tuyến:</span><b id="cartBusFreight">35.000đ</b></div>
+        <div class="flex justify-between"><span>Ưu đãi dùng 200 ViVu Xu:</span><b class="text-emerald-700">-20.000đ</b></div>
+        <div class="flex justify-between pt-1.5 border-t border-teal-200 text-sm font-extrabold text-slate-900">
+          <span>Tổng thanh toán VietQR:</span>
+          <span class="text-[#FF7043]" id="cartGrandTotal">0đ</span>
+        </div>
+      </div>
+
+      <button onclick="submitFreshOrderToSupabase()" class="sheen-sweep w-full py-3.5 rounded-2xl bg-gradient-to-r from-[#00897B] to-[#00695C] text-white font-extrabold text-sm shadow-lg">
+        ✅ Thanh Toán & Đẩy Lệnh Cho Vựa + Tài Xế
+      </button>
+    </div>
+  </div>
+
+  <!-- MODAL 2: SEALING QR & WAYBILL STICKER FOR BOX -->
+  <div id="boxQrStickerModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+    <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-teal-100 text-center space-y-4">
+      <div class="flex items-center justify-between">
+        <span class="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-extrabold">TEM NIÊM PHONG THÙNG XỐP</span>
+        <button onclick="closeModal('boxQrStickerModal')" class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 font-bold">✕</button>
+      </div>
+      <h3 class="text-base font-extrabold text-slate-800" id="qrStickerTitle">Mã Vận Đơn #DS-77309</h3>
+      <div class="flex justify-center p-3 bg-slate-50 rounded-2xl border border-dashed border-teal-300">
+        <div id="qrStickerCanvas"></div>
+      </div>
+      <p class="text-xs text-slate-600" id="qrStickerMeta">Dán tem này lên nắp thùng xốp để tài xế xe 29B-889.68 quét QR nhận hàng lên cốp.</p>
+      <button onclick="closeModal('boxQrStickerModal')" class="w-full py-2.5 rounded-xl bg-[#00897B] text-white font-extrabold text-xs">
+        🖨️ Đã in tem & Bàn giao cho tài xế
+      </button>
+    </div>
+  </div>
+
+  <!-- MODAL 3: UPLOAD REAL PHOTO & EDITED SHORT VIDEO FOR PRODUCT -->
+  <div id="postProductModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-teal-100 space-y-4 max-h-[92vh] overflow-y-auto">
+      <div class="flex items-center justify-between">
+        <div>
+          <span class="px-2.5 py-0.5 rounded-full bg-orange-100 text-orange-800 text-[10px] font-extrabold">MEDIA THỰC TẾ TẠI VỰA</span>
+          <h3 class="text-lg font-extrabold text-slate-800 mt-0.5">📸 Đăng Đặc Sản Kèm Ảnh Thật & Video Ngắn</h3>
+        </div>
+        <button onclick="closeModal('postProductModal')" class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 font-bold">✕</button>
+      </div>
+
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Tên đặc sản thu hoạch hôm nay</label>
+          <input id="newProdName" type="text" placeholder="VD: Bề bề trứng hấp sơ Hạ Long (Khay 1kg)" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 font-semibold" />
+        </div>
+
+        <!-- Real Photo Uploader -->
+        <div class="p-3 rounded-2xl bg-teal-50/60 border border-dashed border-teal-300 space-y-2">
+          <div class="flex items-center justify-between">
+            <label class="font-extrabold text-[#00695C]">📷 1. Tải ảnh thật sản phẩm (từ máy/điện thoại)</label>
+            <span class="text-[10px] text-slate-500">JPG, PNG, WEBP</span>
+          </div>
+          <input id="newProdPhotoFile" type="file" accept="image/*" onchange="previewUploadedImage(event)" class="block w-full text-xs text-slate-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-extrabold file:bg-[#00897B] file:text-white hover:file:bg-[#00695C]" />
+          <div id="photoPreviewBox" class="hidden pt-1">
+            <img id="photoPreviewImg" src="" alt="Preview" class="h-28 w-full object-cover rounded-xl border border-teal-200" />
+          </div>
+        </div>
+
+        <!-- Pre-recorded & Edited Short Video Uploader -->
+        <div class="p-3 rounded-2xl bg-orange-50/60 border border-dashed border-orange-300 space-y-2">
+          <div class="flex items-center justify-between">
+            <label class="font-extrabold text-orange-900">🎬 2. Tải video quảng cáo đã quay & edit sẵn</label>
+            <span class="text-[10px] text-slate-500">MP4, MOV, WEBM</span>
+          </div>
+          <input id="newProdVideoFile" type="file" accept="video/*" onchange="previewUploadedVideo(event)" class="block w-full text-xs text-slate-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-extrabold file:bg-[#FF7043] file:text-white hover:file:bg-orange-600" />
+          <div id="videoPreviewBox" class="hidden pt-1">
+            <video id="videoPreviewPlayer" controls class="h-36 w-full object-cover rounded-xl border border-orange-200 bg-black"></video>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2.5">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Phân loại bảo quản</label>
+            <select id="newProdCat" class="w-full px-3 py-2 rounded-xl border border-slate-200 font-semibold bg-white">
+              <option value="seafood">❄️ Hải sản giữ lạnh</option>
+              <option value="fruit">🥭 Trái cây tươi tại vườn</option>
+              <option value="specialty">🥡 Đặc sản đóng gói khô</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Trục chuyến xe gửi</label>
+            <select id="newProdRoute" class="w-full px-3 py-2 rounded-xl border border-slate-200 font-semibold bg-white">
+              <option value="QN-HN">Quảng Ninh → Hà Nội</option>
+              <option value="HP-HN">Hải Phòng → Hà Nội</option>
+              <option value="LS-HN">Lạng Sơn / Bắc Giang → HN</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2.5">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Giá bán tại vựa (VNĐ)</label>
+            <input id="newProdPrice" type="number" value="290000" step="10000" class="w-full px-3 py-2 rounded-xl border border-slate-200 font-extrabold" />
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Số lượng mẻ hôm nay</label>
+            <input id="newProdStock" type="number" value="25" class="w-full px-3 py-2 rounded-xl border border-slate-200 font-extrabold" />
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Cam kết đóng gói chống mùi / rò rỉ</label>
+          <input id="newProdPack" type="text" value="Thùng xốp 5 lớp + Đá gel + Băng keo kín 100%" class="w-full px-3 py-2 rounded-xl border border-slate-200 font-semibold" />
+        </div>
+      </div>
+
+      <button onclick="publishNewFreshProduct()" class="sheen-sweep w-full py-3.5 rounded-2xl bg-gradient-to-r from-[#FF7043] to-[#FF9800] text-white font-extrabold text-sm shadow-lg">
+        🚀 Đăng Ảnh & Video Lên Chợ Tuyến Ngay
+      </button>
+    </div>
+  </div>
+
+  <!-- MODAL 4: SHORT VIDEO LIGHTBOX PLAYER -->
+  <div id="videoPlayerModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-md p-4">
+    <div class="bg-slate-950 text-white rounded-3xl max-w-md w-full p-4 shadow-2xl border border-white/15 space-y-3">
+      <div class="flex items-center justify-between">
+        <span class="px-2.5 py-0.5 rounded-full bg-teal-500/20 text-teal-300 border border-teal-400/30 text-[10px] font-extrabold">🎬 VIDEO QUẢNG BÁ TẠI VỰA</span>
+        <button onclick="closeVideoPlayerModal()" class="w-8 h-8 rounded-full bg-white/10 text-white font-bold">✕</button>
+      </div>
+      <div class="rounded-2xl overflow-hidden bg-black aspect-[9/14] max-h-[62vh] flex items-center justify-center">
+        <video id="lightboxVideoElement" controls autoplay playsinline class="w-full h-full object-cover"></video>
+      </div>
+      <div class="flex items-center justify-between gap-2 pt-1">
+        <div class="min-w-0">
+          <h4 class="font-extrabold text-sm truncate" id="lightboxProdTitle">Chả mực giã tay Hạ Long</h4>
+          <p class="text-xs font-extrabold text-amber-300" id="lightboxProdPrice">420.000đ</p>
+        </div>
+        <button id="lightboxOrderBtn" class="sheen-sweep px-4 py-2.5 rounded-xl bg-[#FF7043] text-white text-xs font-extrabold shrink-0">
+          🛒 Thêm vào giỏ ngay
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 5: SUPABASE CLOUD CONNECTION -->
+  <div id="supabaseConfigModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-teal-100 space-y-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <span class="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-extrabold">HỆ SINH THÁI 3 APP CHUNG DB</span>
+          <h3 class="text-lg font-extrabold text-slate-800 mt-1">☁️ Kết Nối Supabase Chung</h3>
+        </div>
+        <button onclick="closeModal('supabaseConfigModal')" class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 font-bold">✕</button>
+      </div>
+      <p class="text-xs text-slate-500">Dán đúng <b>Project URL</b> và <b>Publishable Key</b> (`sb_publishable_...`) giống 2 app kia để đồng bộ chat Live, ảnh/video Storage và đơn hàng sang App Tài xế.</p>
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Project URL</label>
+          <input id="sbUrlInput" type="text" value="https://hqndjkwkihgulqqaoejj.supabase.co" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 font-mono text-[11px] bg-slate-50" />
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Publishable / Anon Public Key</label>
+          <input id="sbKeyInput" type="text" placeholder="sb_publishable_..." class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 font-mono text-[11px]" />
+        </div>
+      </div>
+      <div class="flex gap-2">
+        <button onclick="closeModal('supabaseConfigModal')" class="px-4 py-2.5 rounded-xl bg-slate-100 text-slate-700 font-bold text-xs">Chạy Demo</button>
+        <button onclick="connectSupabaseRealtime()" class="flex-1 py-2.5 rounded-xl bg-[#00897B] hover:bg-[#00695C] text-white font-extrabold text-xs shadow">
+          🔗 Kết nối & Đồng bộ 3 App
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ==================== VIVU LOGO SVG ====================
+    function createViVuLogoSVG(size = 48) {
+      return `
+        <svg width="${size}" height="${size}" viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <radialGradient id="badgeGradF2" cx="50%" cy="35%" r="65%">
+              <stop offset="0%" stop-color="#80DEEA"/>
+              <stop offset="55%" stop-color="#00897B"/>
+              <stop offset="100%" stop-color="#004D40"/>
+            </radialGradient>
+            <linearGradient id="vTealOrangeF2" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#004D40"/>
+              <stop offset="45%" stop-color="#009688"/>
+              <stop offset="100%" stop-color="#FF9800"/>
+            </linearGradient>
+            <linearGradient id="orangePinGradF2" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#FFAB40"/>
+              <stop offset="100%" stop-color="#F4511E"/>
+            </linearGradient>
+          </defs>
+          <circle cx="120" cy="120" r="114" fill="url(#badgeGradF2)" stroke="#E0F7FA" stroke-width="3"/>
+          <path d="M 12 145 Q 65 125 125 142 T 228 138 L 228 190 Q 120 230 12 190 Z" fill="#26A69A" opacity="0.55"/>
+          <path d="M 62 72 C 78 72, 85 95, 96 116 C 108 100, 125 84, 142 74 L 136 66 L 164 68 L 156 94 L 149 86 C 128 104, 108 134, 94 138 C 78 140, 68 95, 56 76 Z" fill="url(#vTealOrangeF2)"/>
+          <path d="M 86 138 C 105 142, 126 122, 144 98 C 134 126, 112 150, 88 146 Z" fill="#FF7043"/>
+          <path d="M 164 32 C 154 32, 147 40, 147 49 C 147 61, 164 74, 164 74 C 164 74, 181 61, 181 49 C 181 40, 174 32, 164 32 Z" fill="url(#orangePinGradF2)"/>
+          <circle cx="164" cy="49" r="5.5" fill="#E0F7FA"/>
+        </svg>
+      `;
+    }
+
+    // ==================== APPLICATION STATE ====================
+    const freshState = {
+      role: 'buyer',
+      activeRouteFilter: 'ALL',
+      activeCategory: 'all',
+      deliverToSeat: false,
+      vivuXu: 1250,
+      supabaseClient: null,
+      liveMediaStream: null,
+      pinnedProductId: 'SP-01',
+      liveHearts: 642,
+      liveSessionId: 'LIVE-COTAM-01',
+      isBroadcastingLive: false,
+      uploadedPhotoDataUrl: '',
+      uploadedVideoObjectUrl: '',
+      uploadedPhotoFile: null,
+      uploadedVideoFile: null,
+      countdownSeconds: 42 * 60 + 18,
+      routeCorridors: [
+        { id: 'ALL', label: '🌐 Tất cả tuyến xe' },
+        { id: 'QN-HN', label: '🦐 Quảng Ninh → Hà Nội' },
+        { id: 'HP-HN', label: '🦀 Hải Phòng → Hà Nội' },
+        { id: 'LS-HN', label: '🥭 Lạng Sơn / Bắc Giang → HN' }
+      ],
+      products: [
+        {
+          id: 'SP-01',
+          name: 'Chả mực giã tay Hạ Long loại 1 (Khay 1kg)',
+          merchant: 'Vựa Hải Sản Cô Tám - Bến Đoan',
+          routeId: 'QN-HN',
+          routeLabel: 'Quảng Ninh → Hà Nội',
+          category: 'seafood',
+          tempTag: '❄️ Giữ lạnh thùng xốp',
+          imageUrl: 'https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?auto=format&fit=crop&w=800&q=80',
+          videoUrl: 'https://assets.mixkit.co/videos/preview/mixkit-fresh-seafood-on-ice-at-a-market-42873-large.mp4',
+          price: 420000,
+          stockLeft: 14,
+          soldToday: 36,
+          packaging: 'Hút chân không + Thùng xốp đá gel kín mùi 100%',
+          etaText: 'Nhận trưa nay 12:30 tại Cầu Giấy'
+        },
+        {
+          id: 'SP-02',
+          name: 'Tôm sú biển Quảng Yên tươi sống sục oxy (1kg)',
+          merchant: 'Bến Cá Quảng Yên - Quảng Ninh',
+          routeId: 'QN-HN',
+          routeLabel: 'Quảng Ninh → Hà Nội',
+          category: 'seafood',
+          tempTag: '❄️ Hàng tươi giao gấp < 3h',
+          imageUrl: 'https://images.unsplash.com/photo-1565680018434-b513d5e5fd47?auto=format&fit=crop&w=800&q=80',
+          videoUrl: 'https://assets.mixkit.co/videos/preview/mixkit-shrimp-and-seafood-on-display-at-a-market-42874-large.mp4',
+          price: 360000,
+          stockLeft: 9,
+          soldToday: 21,
+          packaging: 'Túi oxy 2 lớp + Thùng xốp dán băng keo chống rò rỉ',
+          etaText: 'Nhận trưa nay 12:30 tại Cầu Giấy'
+        },
+        {
+          id: 'SP-03',
+          name: 'Cua biển Đồ Sơn gạch son chắc thịt (1kg / 2 con)',
+          merchant: 'Vựa Cua Đồ Sơn - Hải Phòng',
+          routeId: 'HP-HN',
+          routeLabel: 'Hải Phòng → Hà Nội',
+          category: 'seafood',
+          tempTag: '🌬️ Khoang thoáng mát',
+          imageUrl: 'https://images.unsplash.com/photo-1553659971-f01207815844?auto=format&fit=crop&w=800&q=80',
+          videoUrl: '',
+          price: 490000,
+          stockLeft: 7,
+          soldToday: 18,
+          packaging: 'Buộc dây lạt mỏng + Thùng carton đục lỗ thoáng khí',
+          etaText: 'Nhận chiều nay 14:15 tại Bến xe Nước Ngầm'
+        },
+        {
+          id: 'SP-04',
+          name: 'Na dai Đồng Bành Chi Lăng chín cây (Thùng 5kg)',
+          merchant: 'HTX Nông Sản Chi Lăng - Lạng Sơn',
+          routeId: 'LS-HN',
+          routeLabel: 'Lạng Sơn / Bắc Giang → HN',
+          category: 'fruit',
+          tempTag: '🌿 Trái cây tươi tại vườn',
+          imageUrl: 'https://images.unsplash.com/photo-1610832958506-aa56368176cf?auto=format&fit=crop&w=800&q=80',
+          videoUrl: 'https://assets.mixkit.co/videos/preview/mixkit-fresh-fruits-in-a-basket-at-a-market-42869-large.mp4',
+          price: 240000,
+          stockLeft: 22,
+          soldToday: 48,
+          packaging: 'Xốp lưới chống dập từng quả + Thùng carton cứng',
+          etaText: 'Nhận chiều nay 15:00 tại Bến xe Mỹ Đình'
+        },
+        {
+          id: 'SP-05',
+          name: 'Sá sùng khô Quan Lạn nướng giòn (Gói 200g)',
+          merchant: 'Đặc Sản Vân Đồn - Quảng Ninh',
+          routeId: 'QN-HN',
+          routeLabel: 'Quảng Ninh → Hà Nội',
+          category: 'specialty',
+          tempTag: '📦 Hàng khô đóng gói kín',
+          imageUrl: 'https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?auto=format&fit=crop&w=800&q=80',
+          videoUrl: '',
+          price: 550000,
+          stockLeft: 11,
+          soldToday: 15,
+          packaging: 'Túi zip bạc hút chân không, không mùi',
+          etaText: 'Nhận trưa nay 12:30 tại Cầu Giấy'
+        },
+        {
+          id: 'SP-06',
+          name: 'Bánh đa cua đỏ Hải Phòng + Chả lá lốt (Set 5 suất)',
+          merchant: 'Bếp Đặc Sản Lạch Tray - Hải Phòng',
+          routeId: 'HP-HN',
+          routeLabel: 'Hải Phòng → Hà Nội',
+          category: 'specialty',
+          tempTag: '❄️ Giữ mát trong ngày',
+          imageUrl: 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=800&q=80',
+          videoUrl: '',
+          price: 165000,
+          stockLeft: 19,
+          soldToday: 31,
+          packaging: 'Hộp nhựa thực phẩm + Thùng giữ nhiệt',
+          etaText: 'Nhận chiều nay 14:15 tại Bến xe Nước Ngầm'
+        }
+      ],
+      cart: [
+        { productId: 'SP-01', qty: 1 },
+        { productId: 'SP-04', qty: 1 }
+      ],
+      liveChatMessages: [
+        { sender: 'Vựa Hải Sản Cô Tám', isHost: true, text: 'Chào cả nhà! Mẻ chả mực giã tay sáng nay vừa đóng khay hút chân không, còn 14 khay kịp xe 10:00 ạ!' },
+        { sender: 'Thu Hà (Ghế C2)', isHost: false, text: 'Chị ơi em đang ngồi trên xe về Hà Nội, chốt 1 khay giao thẳng lên ghế C2 giúp em nhé!' },
+        { sender: 'Hoàng Nam', isHost: false, text: 'Tôm sú Quảng Yên có đóng thùng xốp sục oxy về Mỹ Đình không vựa ơi?' },
+        { sender: 'Vựa Hải Sản Cô Tám', isHost: true, text: 'Có anh Nam ơi, túi oxy 2 lớp đặt trong thùng xốp dán băng keo kín mít, về tới Mỹ Đình tôm vẫn bật tanh tách ạ!' }
+      ],
+      showcasePosts: [
+        {
+          id: 'POST-1',
+          merchant: 'Vựa Hải Sản Cô Tám - Bến Đoan',
+          time: '06:45 Sáng nay • Quay & Edit trực tiếp tại bến',
+          badge: '🎬 Video ngắn 0:24',
+          title: 'Cận cảnh mẻ hải sản tươi rói vừa cập bến Hạ Long, đóng thùng xốp gửi xe tuyến!',
+          desc: 'Khách Hà Nội đặt trước 09:30 sẽ kịp lên chuyến Limousine 29B-889.68 lúc 10:00, trưa 12:30 nhận hàng tại 144 Xuân Thủy.',
+          productId: 'SP-01',
+          imageUrl: 'https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?auto=format&fit=crop&w=800&q=80',
+          videoUrl: 'https://assets.mixkit.co/videos/preview/mixkit-fresh-seafood-on-ice-at-a-market-42873-large.mp4'
+        },
+        {
+          id: 'POST-2',
+          merchant: 'Bến Cá Quảng Yên - Quảng Ninh',
+          time: '07:10 Sáng nay • Video quay tại thuyền',
+          badge: '🎬 Video ngắn 0:18',
+          title: 'Tôm sú biển Quảng Yên nhảy tanh tách vừa kéo lưới sáng sớm',
+          desc: 'Đóng túi oxy 2 lớp + đá gel giữ mát, bảo đảm tươi nguyên khi xe cập bến Hà Nội.',
+          productId: 'SP-02',
+          imageUrl: 'https://images.unsplash.com/photo-1565680018434-b513d5e5fd47?auto=format&fit=crop&w=800&q=80',
+          videoUrl: 'https://assets.mixkit.co/videos/preview/mixkit-shrimp-and-seafood-on-display-at-a-market-42874-large.mp4'
+        },
+        {
+          id: 'POST-3',
+          merchant: 'HTX Nông Sản Chi Lăng - Lạng Sơn',
+          time: '07:25 Sáng nay • Video thu hoạch tại vườn',
+          badge: '🎬 Video ngắn 0:30',
+          title: 'Hái na dai mở mắt trên núi đá Chi Lăng, bọc xốp lưới từng quả gửi xe tuyến',
+          desc: 'Cam kết không dập nát, bao ăn từng quả. Cước gửi xe tuyến chỉ 35.000đ/thùng 5kg.',
+          productId: 'SP-04',
+          imageUrl: 'https://images.unsplash.com/photo-1610832958506-aa56368176cf?auto=format&fit=crop&w=800&q=80',
+          videoUrl: 'https://assets.mixkit.co/videos/preview/mixkit-fresh-fruits-in-a-basket-at-a-market-42869-large.mp4'
+        }
+      ],
+      merchantOrders: [
+        {
+          id: 'DS-77309',
+          customerName: 'Minh Anh',
+          customerPhone: '0912 345 678',
+          itemsSummary: '1x Chả mực giã tay Hạ Long (1kg)',
+          route: 'Quảng Ninh → Hà Nội (Xe 29B-889.68)',
+          deliveryTarget: '🚏 Trạm 144 Xuân Thủy, Cầu Giấy',
+          foodAmount: 420000,
+          freightAmount: 35000,
+          paidStatus: 'Đã thanh toán VietQR 100%',
+          foamSealed: true,
+          dispatchedToBus: true
+        },
+        {
+          id: 'DS-77315',
+          customerName: 'Phạm Thu Hà (Ghế C2)',
+          customerPhone: '0904 776 889',
+          itemsSummary: '2x Sá sùng khô Quan Lạn (200g)',
+          route: 'Quảng Ninh → Hà Nội (Xe 29B-889.68)',
+          deliveryTarget: '💺 Giao thẳng lên ghế C2 chuyến về',
+          foodAmount: 1100000,
+          freightAmount: 0,
+          paidStatus: 'Đã thanh toán VietQR 100%',
+          foamSealed: false,
+          dispatchedToBus: false
+        },
+        {
+          id: 'DS-77322',
+          customerName: 'Lê Hoàng Nam',
+          customerPhone: '0988 221 334',
+          itemsSummary: '1x Tôm sú biển Quảng Yên (1kg)',
+          route: 'Quảng Ninh → Hà Nội (Xe 29B-889.68)',
+          deliveryTarget: '🚏 Trạm BigC Thăng Long',
+          foodAmount: 360000,
+          freightAmount: 35000,
+          paidStatus: 'Đã thanh toán VietQR 100%',
+          foamSealed: false,
+          dispatchedToBus: false
+        }
+      ]
+    };
+
+    // ==================== INITIALIZATION ====================
+    window.onload = function () {
+      document.getElementById('sidebarLogoContainer').innerHTML = createViVuLogoSVG(48);
+      document.getElementById('mobileLogoContainer').innerHTML = createViVuLogoSVG(40);
+
+      renderAllFreshViews();
+      startCountdownTimer();
+
+      const savedKey = localStorage.getItem('vivu_sb_publishable_key');
+      if (savedKey) {
+        document.getElementById('sbKeyInput').value = savedKey;
+        connectSupabaseRealtime(true);
+      }
+    };
+
+    function startCountdownTimer() {
+      setInterval(() => {
+        if (freshState.countdownSeconds > 0) {
+          freshState.countdownSeconds--;
+        } else {
+          freshState.countdownSeconds = 45 * 60;
+        }
+        const mins = Math.floor(freshState.countdownSeconds / 60);
+        const secs = freshState.countdownSeconds % 60;
+        const formatted = `00:${mins < 10 ? '0' + mins : mins}:${secs < 10 ? '0' + secs : secs}`;
+        document.getElementById('heroCountdownTimer').textContent = formatted;
+        document.getElementById('nextBusDepartureChip').textContent = `⏳ Chuyến QN → HN chạy sau: ${mins}p`;
+      }, 1000);
+    }
+
+    // ==================== ROLE & TABS ====================
+    function switchFreshRole(role) {
+      freshState.role = role;
+      document.getElementById('roleBtn-buyer').className = role === 'buyer'
+        ? 'py-1.5 rounded-lg bg-[#FF7043] text-white shadow'
+        : 'py-1.5 rounded-lg text-teal-100 hover:bg-white/10';
+      document.getElementById('roleBtn-merchant').className = role === 'merchant'
+        ? 'py-1.5 rounded-lg bg-[#FF7043] text-white shadow'
+        : 'py-1.5 rounded-lg text-teal-100 hover:bg-white/10';
+
+      if (role === 'merchant') {
+        document.getElementById('activeRoleIdentity').textContent = 'Vựa Cô Tám • Hạ Long';
+        switchTab('merchant');
+        showToast('🏪 Đã chuyển sang Trạm Chủ Vựa & Phát Live bán hàng', 'info');
+      } else {
+        document.getElementById('activeRoleIdentity').textContent = `Khách: Minh Anh • ${freshState.vivuXu.toLocaleString('vi-VN')} Xu`;
+        switchTab('market');
+        showToast('🛒 Đã chuyển sang Chợ Đặc Sản Theo Chuyến Xe', 'info');
+      }
+    }
+
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab-view').forEach((el) => el.classList.add('hidden'));
+      document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+
+      document.querySelectorAll('.nav-btn').forEach((btn) => {
+        const active = btn.dataset.tab === tabName;
+        btn.className = active
+          ? 'nav-btn w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl text-sm font-bold transition-all bg-white text-[#00695C] shadow-md'
+          : 'nav-btn w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl text-sm font-semibold transition-all text-teal-100 hover:bg-white/10';
+      });
+
+      document.querySelectorAll('.mobile-nav-btn').forEach((btn) => {
+        const active = btn.dataset.tab === tabName;
+        btn.classList.toggle('text-[#00897B]', active);
+        btn.classList.toggle('font-bold', active);
+        btn.classList.toggle('text-slate-500', !active);
+      });
+    }
+
+    
+    // ==================== LIVE SESSION REALTIME SYNC TO CUSTOMER APP ====================
+    async function syncLiveSessionToSupabase(isLiveOverride = null) {
+      if (typeof isLiveOverride === 'boolean') {
+        freshState.isBroadcastingLive = isLiveOverride;
+      }
+      if (!freshState.supabaseClient) return;
+      try {
+        const pinned = freshState.products.find((p) => p.id === freshState.pinnedProductId) || freshState.products[0];
+        const titleEl = document.getElementById('liveRoomTitle');
+        const roomTitle = titleEl ? titleEl.textContent.trim() : 'Live đặc sản tại vựa ViVu Fresh';
+        await freshState.supabaseClient.from('fresh_live_sessions').upsert({
+          id: freshState.liveSessionId,
+          merchant_name: 'Vựa Hải Sản Cô Tám - Bến Đoan',
+          route_id: pinned ? pinned.routeId : 'QN-HN',
+          route_label: pinned ? pinned.routeLabel : 'Quảng Ninh → Hà Nội',
+          room_title: roomTitle,
+          pinned_product_id: pinned ? pinned.id : 'SP-01',
+          cover_image: pinned ? pinned.imageUrl : 'https://images.unsplash.com/photo-1559737558-2f5a35f4523b?auto=format&fit=crop&w=1000&q=80',
+          is_live: freshState.isBroadcastingLive,
+          viewer_count: 148 + Math.floor(Math.random() * 25),
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'id' });
+      } catch (err) {
+        console.warn('Đồng bộ phiên Live cảnh báo:', err);
+      }
+    }
+
+    // ==================== NATIVE IN-APP LIVE STREAMING & REAL-TIME CHAT ====================
+    async function startNativeCameraLive() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        freshState.liveMediaStream = stream;
+        const videoEl = document.getElementById('nativeLiveCameraVideo');
+        videoEl.srcObject = stream;
+        videoEl.classList.remove('hidden');
+        document.getElementById('simulatedLiveBroadcast').classList.add('hidden');
+        document.getElementById('startNativeLiveBtn').classList.add('hidden');
+        document.getElementById('stopNativeLiveBtn').classList.remove('hidden');
+
+        await syncLiveSessionToSupabase(true);
+        pushSystemLiveChat('🔴 Chủ vựa đã bật Camera phát Live trực tiếp ngay tại quầy hàng & đề xuất lên App Khách hàng!');
+        showToast('📡 Đã bật Camera phát Live & đẩy đề xuất lên App Khách hàng!', 'success');
+      } catch (err) {
+        document.getElementById('startNativeLiveBtn').classList.add('hidden');
+        document.getElementById('stopNativeLiveBtn').classList.remove('hidden');
+        await syncLiveSessionToSupabase(true);
+        pushSystemLiveChat('🔴 Chủ vựa đã mở phiên Live tại quầy & đề xuất lên App Khách hàng!');
+        showToast('📡 Đã mở phiên Live đề xuất trên App Khách hàng (chế độ luồng mẫu do chưa cấp quyền Camera)!', 'info');
+      }
+    }
+
+    async function stopNativeCameraLive() {
+      if (freshState.liveMediaStream) {
+        freshState.liveMediaStream.getTracks().forEach((t) => t.stop());
+        freshState.liveMediaStream = null;
+      }
+      const videoEl = document.getElementById('nativeLiveCameraVideo');
+      videoEl.srcObject = null;
+      videoEl.classList.add('hidden');
+      document.getElementById('simulatedLiveBroadcast').classList.remove('hidden');
+      document.getElementById('startNativeLiveBtn').classList.remove('hidden');
+      document.getElementById('stopNativeLiveBtn').classList.add('hidden');
+      await syncLiveSessionToSupabase(false);
+      showToast('⏹️ Đã dừng phiên phát Live & gỡ khỏi đề xuất App Khách hàng.', 'info');
+    }
+
+    function renderPinnedLiveProduct() {
+      const prod = freshState.products.find((p) => p.id === freshState.pinnedProductId) || freshState.products[0];
+      document.getElementById('pinnedLiveImg').src = prod.imageUrl;
+      document.getElementById('pinnedLiveName').textContent = prod.name;
+      document.getElementById('pinnedLivePrice').textContent = formatVND(prod.price);
+      document.getElementById('pinnedLiveStock').textContent = `Còn ${prod.stockLeft} suất`;
+
+      document.getElementById('pinProductSelector').innerHTML = freshState.products.map((p) => `
+        <option value="${p.id}" ${p.id === prod.id ? 'selected' : ''}>${p.name} (${formatVND(p.price)})</option>
+      `).join('');
+    }
+
+    async function changePinnedLiveProduct(prodId) {
+      freshState.pinnedProductId = prodId;
+      renderPinnedLiveProduct();
+      const prod = freshState.products.find((p) => p.id === prodId);
+      await syncLiveSessionToSupabase();
+      pushSystemLiveChat(`📌 Chủ vựa vừa ghim deal mới: ${prod.name} — Giá ${formatVND(prod.price)}`);
+    }
+
+    function quickOrderFromLive() {
+      addProductToCart(freshState.pinnedProductId);
+      const prod = freshState.products.find((p) => p.id === freshState.pinnedProductId);
+      pushSystemLiveChat(`🛒 Khách Minh Anh vừa bấm chốt "${prod.name}" từ giỏ Live!`);
+    }
+
+    function spawnLiveHeart() {
+      freshState.liveHearts += 1;
+      document.getElementById('liveHeartCounter').textContent = freshState.liveHearts;
+      const stage = document.getElementById('liveStageContainer');
+      const heart = document.createElement('div');
+      heart.className = 'floating-heart';
+      heart.textContent = ['❤️', '🦐', '🔥', '🧡'][Math.floor(Math.random() * 4)];
+      heart.style.right = (20 + Math.random() * 45) + 'px';
+      stage.appendChild(heart);
+      setTimeout(() => heart.remove(), 1400);
+    }
+
+    function renderLiveChatFeed() {
+      const box = document.getElementById('liveChatFeed');
+      box.innerHTML = freshState.liveChatMessages.map((m) => `
+        <div class="p-2 rounded-xl ${m.isHost ? 'bg-teal-950/90 border border-teal-500/30' : 'bg-white/5'}">
+          <span class="font-extrabold ${m.isHost ? 'text-amber-300' : 'text-teal-300'}">${m.sender}:</span>
+          <span class="text-slate-100 ml-1">${m.text}</span>
+        </div>
+      `).join('');
+      box.scrollTop = box.scrollHeight;
+    }
+
+    function pushSystemLiveChat(text) {
+      freshState.liveChatMessages.push({ sender: 'Hệ thống ViVu Live', isHost: true, text });
+      renderLiveChatFeed();
+    }
+
+    async function sendLiveChatMessage(e) {
+      e.preventDefault();
+      const input = document.getElementById('liveChatInput');
+      const text = input.value.trim();
+      if (!text) return;
+
+      const sender = freshState.role === 'merchant' ? 'Vựa Hải Sản Cô Tám (Chủ Live)' : 'Minh Anh';
+      const isHost = freshState.role === 'merchant';
+      input.value = '';
+
+      if (freshState.supabaseClient) {
+        try {
+          await freshState.supabaseClient.from('fresh_live_chats').insert({
+            session_id: freshState.liveSessionId,
+            sender,
+            is_host: isHost,
+            message: text
+          });
+          return;
+        } catch (err) {
+          console.warn('Gửi chat DB cảnh báo:', err);
+        }
+      }
+      freshState.liveChatMessages.push({ sender, isHost, text });
+      renderLiveChatFeed();
+    }
+
+    // ==================== MARKETPLACE & REAL MEDIA CARDS ====================
+    function renderRouteCorridorTabs() {
+      document.getElementById('routeCorridorTabs').innerHTML = freshState.routeCorridors.map((rt) => {
+        const isSelected = freshState.activeRouteFilter === rt.id;
+        return `
+          <button onclick="selectRouteCorridor('${rt.id}')" class="px-3.5 py-2 rounded-2xl text-xs font-extrabold transition flex items-center gap-1.5 ${isSelected ? 'bg-[#FF7043] text-white shadow-md ring-2 ring-amber-300' : 'bg-white/15 hover:bg-white/25 text-white border border-white/20'}">
+            <span>${rt.label}</span>
+          </button>
+        `;
+      }).join('');
+    }
+
+    function selectRouteCorridor(routeId) {
+      freshState.activeRouteFilter = routeId;
+      renderRouteCorridorTabs();
+      renderProductGrid();
+    }
+
+    function filterProductsByCategory(cat) {
+      freshState.activeCategory = cat;
+      document.querySelectorAll('.cat-btn').forEach((btn) => {
+        btn.className = btn.dataset.cat === cat
+          ? 'cat-btn px-3.5 py-2 rounded-xl bg-[#00897B] text-white shadow-sm'
+          : 'cat-btn px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-teal-50';
+      });
+      renderProductGrid();
+    }
+
+    function toggleDeliverToSeatMode() {
+      freshState.deliverToSeat = document.getElementById('deliverToSeatToggle').checked;
+      if (freshState.deliverToSeat) {
+        document.getElementById('deliveryModeSelect').value = 'on_seat';
+        showToast('💺 Đã bật chế độ Giao quà thẳng lên ghế #VV-88410 (Miễn phí cước gửi xe)!', 'success');
+      } else {
+        document.getElementById('deliveryModeSelect').value = 'hub_free';
+      }
+      recalculateCartTotals();
+    }
+
+    function renderProductGrid() {
+      const searchQ = (document.getElementById('productSearchInput')?.value || '').trim().toLowerCase();
+      const filtered = freshState.products.filter((p) => {
+        const matchRoute = freshState.activeRouteFilter === 'ALL' || p.routeId === freshState.activeRouteFilter;
+        const matchCat = freshState.activeCategory === 'all' || p.category === freshState.activeCategory;
+        const matchText = !searchQ || p.name.toLowerCase().includes(searchQ) || p.merchant.toLowerCase().includes(searchQ);
+        return matchRoute && matchCat && matchText;
+      });
+
+      document.getElementById('productGrid').innerHTML = filtered.map((p) => `
+        <div class="product-card bg-white/95 rounded-3xl overflow-hidden border border-teal-100 shadow-sm flex flex-col justify-between">
+          <div>
+            <!-- Real Photo Header with Optional Short Video Play Trigger -->
+            <div class="relative h-44 bg-slate-900 overflow-hidden group">
+              <img src="${p.imageUrl}" alt="${p.name}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
+              <div class="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-black/35"></div>
+
+              <div class="absolute top-2.5 left-2.5 right-2.5 flex items-center justify-between gap-1">
+                <span class="px-2.5 py-0.5 rounded-full bg-black/60 backdrop-blur-md text-white text-[10px] font-extrabold border border-white/15">
+                  🚐 ${p.routeLabel}
+                </span>
+                <span class="px-2 py-0.5 rounded-full bg-rose-600 text-white text-[10px] font-extrabold">
+                  Còn ${p.stockLeft} suất
+                </span>
+              </div>
+
+              ${p.videoUrl ? `
+                <button onclick="openProductVideoLightbox('${p.id}')" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 px-3 py-1.5 rounded-full bg-black/65 hover:bg-[#FF7043] backdrop-blur-md border border-white/30 text-white text-[11px] font-extrabold flex items-center gap-1.5 shadow-lg transition">
+                  <span>▶️</span>
+                  <span>Xem video thực tế</span>
+                </button>
+              ` : ''}
+
+              <div class="absolute bottom-2.5 left-2.5 right-2.5 flex items-center justify-between text-[10px] text-white">
+                <span class="px-2 py-0.5 rounded bg-emerald-600/90 font-extrabold">${p.tempTag}</span>
+                <span class="font-semibold text-amber-200">${p.etaText}</span>
+              </div>
+            </div>
+
+            <!-- Product Body -->
+            <div class="p-4 space-y-2.5">
+              <div>
+                <h3 class="font-extrabold text-sm text-slate-800 leading-snug">${p.name}</h3>
+                <p class="text-[11px] text-slate-500 mt-0.5">🏪 ${p.merchant}</p>
+              </div>
+
+              <div class="p-2 rounded-xl bg-slate-50 border border-slate-200/80 text-[10px] text-slate-600">
+                📦 <b>Quy cách:</b> ${p.packaging}
+              </div>
+            </div>
+          </div>
+
+          <div class="px-4 pb-4 pt-2 border-t border-slate-100 flex items-center justify-between gap-2">
+            <div>
+              <div class="text-base font-extrabold text-[#FF7043]">${formatVND(p.price)}</div>
+              <div class="text-[10px] text-slate-400">Đã bán ${p.soldToday} mẻ hôm nay</div>
+            </div>
+            <button onclick="addProductToCart('${p.id}')" class="px-3.5 py-2 rounded-xl bg-[#00897B] hover:bg-[#00695C] text-white text-xs font-extrabold shadow-sm transition">
+              + Thêm vào giỏ
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // ==================== SHORT VIDEOS SHOWCASE FEED ====================
+    function renderHarvestShowcase() {
+      document.getElementById('harvestShowcaseFeed').innerHTML = freshState.showcasePosts.map((post) => {
+        const prod = freshState.products.find((p) => p.id === post.productId) || freshState.products[0];
+        return `
+          <div class="rounded-3xl bg-slate-50 border border-slate-200 overflow-hidden flex flex-col justify-between shadow-xs">
+            <div>
+              <div class="relative h-52 bg-black overflow-hidden">
+                ${post.videoUrl ? `
+                  <video src="${post.videoUrl}" poster="${post.imageUrl}" controls playsinline class="w-full h-full object-cover"></video>
+                ` : `
+                  <img src="${post.imageUrl}" alt="${post.title}" class="w-full h-full object-cover" />
+                `}
+                <span class="absolute top-2.5 left-2.5 px-2.5 py-0.5 rounded-full bg-black/70 text-amber-300 text-[10px] font-extrabold backdrop-blur-md">
+                  ${post.badge}
+                </span>
+              </div>
+
+              <div class="p-4 space-y-1.5">
+                <div class="flex items-center justify-between text-[11px]">
+                  <span class="font-bold text-[#00695C]">🏪 ${post.merchant}</span>
+                  <span class="text-slate-400">${post.time}</span>
+                </div>
+                <h3 class="font-extrabold text-sm text-slate-800">${post.title}</h3>
+                <p class="text-xs text-slate-600 leading-relaxed">${post.desc}</p>
+              </div>
+            </div>
+
+            <div class="mx-4 mb-4 p-3 rounded-2xl bg-white border border-teal-100 flex items-center justify-between gap-2">
+              <div class="flex items-center gap-2.5 min-w-0">
+                <img src="${prod.imageUrl}" alt="${prod.name}" class="w-11 h-11 rounded-xl object-cover shrink-0" />
+                <div class="min-w-0">
+                  <div class="font-extrabold text-xs text-slate-800 truncate">${prod.name}</div>
+                  <div class="text-xs font-extrabold text-[#FF7043]">${formatVND(prod.price)}</div>
+                </div>
+              </div>
+              <button onclick="addProductToCart('${prod.id}')" class="px-3 py-1.5 rounded-xl bg-[#FF7043] hover:bg-orange-600 text-white text-xs font-extrabold shrink-0">
+                Đặt ngay
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function openProductVideoLightbox(prodId) {
+      const prod = freshState.products.find((p) => p.id === prodId);
+      if (!prod || !prod.videoUrl) return;
+      document.getElementById('lightboxVideoElement').src = prod.videoUrl;
+      document.getElementById('lightboxProdTitle').textContent = prod.name;
+      document.getElementById('lightboxProdPrice').textContent = formatVND(prod.price);
+      document.getElementById('lightboxOrderBtn').onclick = () => {
+        addProductToCart(prod.id);
+        closeVideoPlayerModal();
+      };
+      openModal('videoPlayerModal');
+    }
+
+    function closeVideoPlayerModal() {
+      const vid = document.getElementById('lightboxVideoElement');
+      vid.pause();
+      vid.src = '';
+      closeModal('videoPlayerModal');
+    }
+
+    // ==================== UPLOAD REAL PHOTO & EDITED VIDEO ====================
+    function previewUploadedImage(event) {
+      const file = event.target.files?.[0];
+      if (!file) return;
+      freshState.uploadedPhotoFile = file;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        freshState.uploadedPhotoDataUrl = e.target.result;
+        document.getElementById('photoPreviewImg').src = freshState.uploadedPhotoDataUrl;
+        document.getElementById('photoPreviewBox').classList.remove('hidden');
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function previewUploadedVideo(event) {
+      const file = event.target.files?.[0];
+      if (!file) return;
+      freshState.uploadedVideoFile = file;
+      freshState.uploadedVideoObjectUrl = URL.createObjectURL(file);
+      document.getElementById('videoPreviewPlayer').src = freshState.uploadedVideoObjectUrl;
+      document.getElementById('videoPreviewBox').classList.remove('hidden');
+    }
+
+    function openPostProductModal() {
+      freshState.uploadedPhotoDataUrl = '';
+      freshState.uploadedVideoObjectUrl = '';
+      freshState.uploadedPhotoFile = null;
+      freshState.uploadedVideoFile = null;
+      document.getElementById('newProdPhotoFile').value = '';
+      document.getElementById('newProdVideoFile').value = '';
+      document.getElementById('photoPreviewBox').classList.add('hidden');
+      document.getElementById('videoPreviewBox').classList.add('hidden');
+      openModal('postProductModal');
+    }
+
+    async function uploadMediaToSupabase(file, folder = 'products') {
+      if (!freshState.supabaseClient || !file) return '';
+      const ext = (file.name.split('.').pop() || 'bin').toLowerCase();
+      const filePath = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+      const { error } = await freshState.supabaseClient.storage
+        .from('fresh-media')
+        .upload(filePath, file, { cacheControl: '3600', upsert: false });
+      if (error) {
+        console.warn('Upload Storage cảnh báo:', error.message);
+        return '';
+      }
+      const { data } = freshState.supabaseClient.storage
+        .from('fresh-media')
+        .getPublicUrl(filePath);
+      return data?.publicUrl || '';
+    }
+
+    async function publishNewFreshProduct() {
+      const name = document.getElementById('newProdName').value.trim();
+      const category = document.getElementById('newProdCat').value;
+      const routeId = document.getElementById('newProdRoute').value;
+      const price = Number(document.getElementById('newProdPrice').value) || 290000;
+      const stockLeft = Number(document.getElementById('newProdStock').value) || 25;
+      const packaging = document.getElementById('newProdPack').value.trim();
+      if (!name) {
+        showToast('⚠️ Vui lòng nhập tên đặc sản!', 'warning');
+        return;
+      }
+
+      const routeLabels = {
+        'QN-HN': 'Quảng Ninh → Hà Nội',
+        'HP-HN': 'Hải Phòng → Hà Nội',
+        'LS-HN': 'Lạng Sơn / Bắc Giang → HN'
+      };
+      const defaultPhotos = {
+        seafood: 'https://images.unsplash.com/photo-1559737558-2f5a35f4523b?auto=format&fit=crop&w=800&q=80',
+        fruit: 'https://images.unsplash.com/photo-1610832958506-aa56368176cf?auto=format&fit=crop&w=800&q=80',
+        specialty: 'https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?auto=format&fit=crop&w=800&q=80'
+      };
+
+      let finalPhoto = freshState.uploadedPhotoDataUrl || defaultPhotos[category];
+      let finalVideo = freshState.uploadedVideoObjectUrl || '';
+
+      if (freshState.supabaseClient) {
+        showToast('☁️ Đang tải ảnh & video lên Supabase Storage...', 'info');
+        if (freshState.uploadedPhotoFile) {
+          const cloudPhotoUrl = await uploadMediaToSupabase(freshState.uploadedPhotoFile, 'photos');
+          if (cloudPhotoUrl) finalPhoto = cloudPhotoUrl;
+        }
+        if (freshState.uploadedVideoFile) {
+          const cloudVideoUrl = await uploadMediaToSupabase(freshState.uploadedVideoFile, 'videos');
+          if (cloudVideoUrl) finalVideo = cloudVideoUrl;
+        }
+      }
+
+      const newId = 'SP-' + Date.now();
+      const routeLabelText = routeLabels[routeId] || 'Quảng Ninh → Hà Nội';
+      const tempTagText = category === 'seafood' ? '❄️ Giữ lạnh thùng xốp' : '🌿 Tươi trong ngày';
+      const etaLabel = 'Nhận ngay trong chuyến xe kế tiếp';
+
+      const newProduct = {
+        id: newId,
+        name,
+        merchant: 'Vựa Hải Sản Cô Tám - Bến Đoan',
+        routeId,
+        routeLabel: routeLabelText,
+        category,
+        tempTag: tempTagText,
+        imageUrl: finalPhoto,
+        videoUrl: finalVideo,
+        price,
+        stockLeft,
+        soldToday: 1,
+        packaging,
+        etaText: etaLabel
+      };
+
+      freshState.products.unshift(newProduct);
+
+      let newPost = null;
+      if (finalVideo) {
+        newPost = {
+          id: 'POST-' + Date.now(),
+          merchant: 'Vựa Hải Sản Cô Tám - Bến Đoan',
+          time: 'Vừa đăng xong • Video quay & edit tại vựa',
+          badge: '🎬 Video mới tải lên',
+          title: `Mẻ hàng mới: ${name}`,
+          desc: packaging,
+          productId: newId,
+          imageUrl: finalPhoto,
+          videoUrl: finalVideo
+        };
+        freshState.showcasePosts.unshift(newPost);
+      }
+
+      if (freshState.supabaseClient) {
+        try {
+          await freshState.supabaseClient.from('fresh_products').insert({
+            id: newProduct.id,
+            name: newProduct.name,
+            merchant: newProduct.merchant,
+            route_id: newProduct.routeId,
+            route_label: newProduct.routeLabel,
+            category: newProduct.category,
+            temp_tag: newProduct.tempTag,
+            image_url: newProduct.imageUrl,
+            video_url: newProduct.videoUrl,
+            price: newProduct.price,
+            stock_left: newProduct.stockLeft,
+            sold_today: newProduct.soldToday,
+            packaging: newProduct.packaging,
+            eta_text: newProduct.etaText
+          });
+          if (newPost) {
+            await freshState.supabaseClient.from('fresh_showcase_posts').insert({
+              id: newPost.id,
+              merchant: newPost.merchant,
+              time_label: newPost.time,
+              badge: newPost.badge,
+              title: newPost.title,
+              description: newPost.desc,
+              product_id: newPost.productId,
+              image_url: newPost.imageUrl,
+              video_url: newPost.videoUrl
+            });
+          }
+        } catch (e) {
+          console.warn('Lưu DB sản phẩm cảnh báo:', e);
+        }
+      }
+
+      closeModal('postProductModal');
+      renderAllFreshViews();
+      switchTab('market');
+      showToast(`🚀 Đã đăng "${name}" kèm ảnh thật${finalVideo ? ' & video quảng cáo' : ''} lên Chợ Tuyến!`, 'success');
+    }
+
+    // ==================== CART & CHECKOUT ====================
+    function addProductToCart(productId) {
+      const existing = freshState.cart.find((c) => c.productId === productId);
+      if (existing) {
+        existing.qty += 1;
+      } else {
+        freshState.cart.push({ productId, qty: 1 });
+      }
+      updateCartBadge();
+      const prod = freshState.products.find((p) => p.id === productId);
+      showToast(`🛒 Đã thêm "${prod.name}" vào giỏ hàng gửi xe tuyến!`, 'success');
+    }
+
+    function updateCartBadge() {
+      const totalQty = freshState.cart.reduce((s, c) => s + c.qty, 0);
+      document.getElementById('cartCountBadge').textContent = totalQty;
+    }
+
+    function openCartDrawerModal() {
+      renderCartItems();
+      recalculateCartTotals();
+      openModal('cartDrawerModal');
+    }
+
+    function renderCartItems() {
+      const container = document.getElementById('cartItemsContainer');
+      if (freshState.cart.length === 0) {
+        container.innerHTML = `<div class="p-4 text-center text-slate-500">Giỏ hàng đang trống. Hãy chọn đặc sản tươi sống trên chợ tuyến!</div>`;
+        return;
+      }
+      container.innerHTML = freshState.cart.map((item) => {
+        const prod = freshState.products.find((p) => p.id === item.productId);
+        return `
+          <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2.5 min-w-0">
+              <img src="${prod.imageUrl}" alt="${prod.name}" class="w-11 h-11 rounded-xl object-cover shrink-0" />
+              <div class="min-w-0">
+                <div class="font-extrabold text-slate-800 truncate">${prod.name}</div>
+                <div class="text-[11px] text-[#00695C] font-bold">${formatVND(prod.price)} • ${prod.routeLabel}</div>
+              </div>
+            </div>
+            <div class="flex items-center gap-1.5 shrink-0">
+              <button onclick="changeCartQty('${item.productId}', -1)" class="w-7 h-7 rounded-lg bg-white border border-slate-300 font-extrabold">-</button>
+              <span class="w-6 text-center font-extrabold">${item.qty}</span>
+              <button onclick="changeCartQty('${item.productId}', 1)" class="w-7 h-7 rounded-lg bg-white border border-slate-300 font-extrabold">+</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function changeCartQty(productId, delta) {
+      const idx = freshState.cart.findIndex((c) => c.productId === productId);
+      if (idx === -1) return;
+      freshState.cart[idx].qty += delta;
+      if (freshState.cart[idx].qty <= 0) {
+        freshState.cart.splice(idx, 1);
+      }
+      updateCartBadge();
+      renderCartItems();
+      recalculateCartTotals();
+    }
+
+    function recalculateCartTotals() {
+      const foodSubtotal = freshState.cart.reduce((sum, item) => {
+        const prod = freshState.products.find((p) => p.id === item.productId);
+        return sum + (prod ? prod.price * item.qty : 0);
+      }, 0);
+
+      const mode = document.getElementById('deliveryModeSelect').value;
+      const freight = mode === 'on_seat' ? 0 : (mode === 'door_delivery' ? 60000 : 35000);
+      const xuDiscount = foodSubtotal > 0 ? 20000 : 0;
+      const grandTotal = Math.max(0, foodSubtotal + freight - xuDiscount);
+
+      document.getElementById('cartFoodSubtotal').textContent = formatVND(foodSubtotal);
+      document.getElementById('cartBusFreight').textContent = freight === 0 ? '0đ (Miễn phí lên ghế)' : formatVND(freight);
+      document.getElementById('cartGrandTotal').textContent = formatVND(grandTotal);
+    }
+
+    async function submitFreshOrderToSupabase() {
+      if (freshState.cart.length === 0) return;
+
+      const buyerName = document.getElementById('buyerNameInput').value.trim() || 'Minh Anh';
+      const buyerPhone = document.getElementById('buyerPhoneInput').value.trim() || '0912 345 678';
+      const mode = document.getElementById('deliveryModeSelect').value;
+      const deliveryLabel = mode === 'on_seat'
+        ? '💺 Giao thẳng lên ghế xe (#VV-88410)'
+        : (mode === 'door_delivery' ? '🛵 Giao tận cửa nội thành Hà Nội' : '🚏 Trạm 144 Xuân Thủy, Cầu Giấy');
+
+      const foodSubtotal = freshState.cart.reduce((sum, item) => {
+        const prod = freshState.products.find((p) => p.id === item.productId);
+        return sum + (prod ? prod.price * item.qty : 0);
+      }, 0);
+      const freight = mode === 'on_seat' ? 0 : (mode === 'door_delivery' ? 60000 : 35000);
+      const itemsText = freshState.cart.map((item) => {
+        const prod = freshState.products.find((p) => p.id === item.productId);
+        return `${item.qty}x ${prod.name}`;
+      }).join(', ');
+
+      const newOrderCode = 'DS-' + Math.floor(10000 + Math.random() * 89999);
+      const newOrder = {
+        id: newOrderCode,
+        customerName: buyerName,
+        customerPhone: buyerPhone,
+        itemsSummary: itemsText,
+        route: 'Quảng Ninh → Hà Nội (Xe 29B-889.68)',
+        deliveryTarget: deliveryLabel,
+        foodAmount: foodSubtotal,
+        freightAmount: freight,
+        paidStatus: 'Đã thanh toán VietQR 100%',
+        foamSealed: false,
+        dispatchedToBus: false
+      };
+
+      freshState.merchantOrders.unshift(newOrder);
+      freshState.cart = [];
+      freshState.vivuXu += 150;
+      updateCartBadge();
+
+      if (freshState.supabaseClient) {
+        try {
+          await freshState.supabaseClient.from('fresh_orders').insert({
+            id: newOrderCode,
+            customer_name: buyerName,
+            customer_phone: buyerPhone,
+            items_summary: itemsText,
+            route: newOrder.route,
+            delivery_target: deliveryLabel,
+            food_amount: foodSubtotal,
+            freight_amount: freight,
+            paid_status: newOrder.paidStatus,
+            foam_sealed: false,
+            dispatched_to_bus: false
+          });
+        } catch (e) {}
+      }
+
+      closeModal('cartDrawerModal');
+      renderAllFreshViews();
+      switchTab('tracking');
+      showToast(`🎉 Đặt đơn đặc sản #${newOrderCode} thành công! Đã gửi lệnh đóng thùng tới Vựa & Tài xế.`, 'success');
+    }
+
+    // ==================== MERCHANT DISPATCH & PACKAGING CONTROL ====================
+    function renderMerchantOrders() {
+      const pendingCount = freshState.merchantOrders.filter((o) => !o.dispatchedToBus).length;
+      document.getElementById('sidebarOrdersBadge').textContent = pendingCount;
+      document.getElementById('merchantPendingOrdersKpi').textContent = `${pendingCount} đơn`;
+
+      const totalMerchantRev = freshState.merchantOrders.reduce((s, o) => s + o.foodAmount, 0);
+      const totalFreight = freshState.merchantOrders.reduce((s, o) => s + o.freightAmount, 0);
+      document.getElementById('merchantRevenueKpi').textContent = formatVND(totalMerchantRev);
+      document.getElementById('splitMerchantNet').textContent = formatVND(totalMerchantRev);
+      document.getElementById('splitDriverFreight').textContent = formatVND(totalFreight);
+
+      document.getElementById('merchantOrdersQueue').innerHTML = freshState.merchantOrders.map((o) => `
+        <div class="p-4 rounded-2xl border ${o.dispatchedToBus ? 'border-emerald-200 bg-emerald-50/40' : 'border-orange-200 bg-orange-50/30'} space-y-3">
+          <div class="flex flex-wrap items-start justify-between gap-2">
+            <div>
+              <div class="flex flex-wrap items-center gap-1.5">
+                <span class="text-xs font-mono font-extrabold text-[#00695C]">#${o.id}</span>
+                <span class="px-2 py-0.5 rounded-full ${o.dispatchedToBus ? 'bg-emerald-600 text-white' : 'bg-amber-100 text-amber-900'} text-[10px] font-extrabold">
+                  ${o.dispatchedToBus ? '🚐 Đã bàn giao lên xe tuyến' : '⏳ Chờ đóng thùng & gọi xe'}
+                </span>
+                <span class="px-2 py-0.5 rounded bg-teal-100 text-[#00695C] text-[10px] font-bold">${o.paidStatus}</span>
+              </div>
+              <h4 class="font-extrabold text-sm text-slate-800 mt-1">${o.itemsSummary}</h4>
+              <p class="text-xs text-slate-600 mt-0.5">Người nhận: <b>${o.customerName}</b> (${o.customerPhone}) • ${o.deliveryTarget}</p>
+            </div>
+            <div class="text-right">
+              <div class="text-sm font-extrabold text-emerald-800">Tiền hàng: ${formatVND(o.foodAmount)}</div>
+              <div class="text-[11px] text-slate-500">Cước xe tuyến: ${formatVND(o.freightAmount)}</div>
+            </div>
+          </div>
+
+          <div class="pt-2.5 border-t border-slate-200/80 flex flex-wrap items-center justify-between gap-2 text-xs">
+            <label class="flex items-center gap-2 cursor-pointer font-bold ${o.foamSealed ? 'text-emerald-700' : 'text-rose-700'}">
+              <input type="checkbox" ${o.foamSealed ? 'checked' : ''} onchange="toggleFoamSealCheck('${o.id}', this.checked)" class="accent-[#00897B] w-4 h-4" />
+              <span>📦 Xác nhận đã đóng thùng xốp + đá gel + dán kín chống mùi/chảy nước</span>
+            </label>
+
+            <div class="flex gap-2">
+              <button onclick="openBoxQrSticker('${o.id}')" class="px-3 py-1.5 rounded-xl bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-bold">
+                🏷️ In tem QR thùng
+              </button>
+              ${!o.dispatchedToBus ? `
+                <button onclick="pushOrderToBusDriver('${o.id}')" class="sheen-sweep px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-[#00897B] to-[#00695C] text-white font-extrabold shadow-sm">
+                  🚐 Đẩy sang App Tài xế
+                </button>
+              ` : `<span class="px-3 py-1.5 text-emerald-700 font-extrabold">✅ Tài xế đã nhận kiện</span>`}
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function toggleFoamSealCheck(orderId, checked) {
+      const ord = freshState.merchantOrders.find((o) => o.id === orderId);
+      if (!ord) return;
+      ord.foamSealed = checked;
+      renderMerchantOrders();
+    }
+
+    function pushOrderToBusDriver(orderId) {
+      const ord = freshState.merchantOrders.find((o) => o.id === orderId);
+      if (!ord) return;
+      if (!ord.foamSealed) {
+        showToast('⚠️ Vui lòng tick xác nhận "Đã đóng thùng xốp kín chống mùi/rò rỉ" trước khi bàn giao cho xe Limousine!', 'warning');
+        return;
+      }
+      ord.dispatchedToBus = true;
+      renderAllFreshViews();
+      showToast(`🚐 Đã đẩy vận đơn #${ord.id} sang App Tài xế ViVu Partner Pro!`, 'success');
+    }
+
+    function openBoxQrSticker(orderId) {
+      const ord = freshState.merchantOrders.find((o) => o.id === orderId);
+      if (!ord) return;
+      document.getElementById('qrStickerTitle').textContent = `Tem Thùng Hàng #${ord.id}`;
+      document.getElementById('qrStickerMeta').textContent = `${ord.itemsSummary} • Giao tại: ${ord.deliveryTarget}`;
+      const canvasDiv = document.getElementById('qrStickerCanvas');
+      canvasDiv.innerHTML = '';
+      new QRCode(canvasDiv, {
+        text: ord.id,
+        width: 140,
+        height: 140,
+        colorDark: '#004D40',
+        colorLight: '#ffffff'
+      });
+      openModal('boxQrStickerModal');
+    }
+
+    function simulateNewFreshOrder() {
+      const code = 'DS-' + Math.floor(10000 + Math.random() * 89999);
+      freshState.merchantOrders.unshift({
+        id: code,
+        customerName: 'Trần Minh Quân',
+        customerPhone: '0936 882 119',
+        itemsSummary: '1x Chả mực giã tay Hạ Long + 1x Tôm sú biển',
+        route: 'Quảng Ninh → Hà Nội (Xe 29B-889.68)',
+        deliveryTarget: '🚏 Trạm Bến xe Mỹ Đình',
+        foodAmount: 780000,
+        freightAmount: 40000,
+        paidStatus: 'Đã thanh toán VietQR 100%',
+        foamSealed: false,
+        dispatchedToBus: false
+      });
+      renderAllFreshViews();
+      showToast(`🔔 Ting-ting! Khách Trần Minh Quân vừa đặt đơn đặc sản #${code}!`, 'success');
+    }
+
+    // ==================== SHIPMENT TRACKING ====================
+    function renderShipmentTracking() {
+      document.getElementById('shipmentTrackingList').innerHTML = freshState.merchantOrders.map((o) => `
+        <div class="p-4 rounded-2xl border border-slate-200 bg-slate-50/70 space-y-2.5">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <span class="font-mono font-extrabold text-xs text-[#00695C]">#${o.id}</span>
+              <span class="ml-2 font-extrabold text-sm text-slate-800">${o.itemsSummary}</span>
+            </div>
+            <span class="px-2.5 py-1 rounded-full ${o.dispatchedToBus ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'} text-[11px] font-extrabold">
+              ${o.dispatchedToBus ? '🚐 Đang di chuyển trên xe 29B-889.68' : '📦 Vựa đang đóng thùng giữ lạnh'}
+            </span>
+          </div>
+
+          <div class="grid grid-cols-3 gap-2 text-center text-[11px] pt-1">
+            <div class="p-2 rounded-xl bg-emerald-100/80 text-emerald-900 font-bold">1. Chốt đơn & Thanh toán ✓</div>
+            <div class="p-2 rounded-xl ${o.foamSealed ? 'bg-emerald-100/80 text-emerald-900 font-bold' : 'bg-white border border-slate-200 text-slate-500'}">2. Đóng thùng xốp kín ${o.foamSealed ? '✓' : '...'}</div>
+            <div class="p-2 rounded-xl ${o.dispatchedToBus ? 'bg-[#00897B] text-white font-bold' : 'bg-white border border-slate-200 text-slate-500'}">3. Lên xe tuyến giao khách ${o.dispatchedToBus ? '🚐' : '...'}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // ==================== SUPABASE CONNECTION ====================
+    function openSupabaseConfigModal() { openModal('supabaseConfigModal'); }
+
+    async function loadInitialFreshData() {
+      if (!freshState.supabaseClient) return;
+      try {
+        const [{ data: prods }, { data: posts }, { data: chats }, { data: orders }] = await Promise.all([
+          freshState.supabaseClient.from('fresh_products').select('*').order('created_at', { ascending: false }),
+          freshState.supabaseClient.from('fresh_showcase_posts').select('*').order('created_at', { ascending: false }),
+          freshState.supabaseClient.from('fresh_live_chats').select('*').order('id', { ascending: true }).limit(60),
+          freshState.supabaseClient.from('fresh_orders').select('*').order('created_at', { ascending: false })
+        ]);
+
+        if (prods && prods.length > 0) {
+          freshState.products = prods.map((r) => ({
+            id: r.id,
+            name: r.name,
+            merchant: r.merchant,
+            routeId: r.route_id,
+            routeLabel: r.route_label,
+            category: r.category,
+            tempTag: r.temp_tag || '❄️ Tươi ngon',
+            imageUrl: r.image_url || 'https://images.unsplash.com/photo-1559737558-2f5a35f4523b?auto=format&fit=crop&w=800&q=80',
+            videoUrl: r.video_url || '',
+            price: Number(r.price) || 0,
+            stockLeft: Number(r.stock_left) || 0,
+            soldToday: Number(r.sold_today) || 0,
+            packaging: r.packaging || 'Thùng xốp giữ lạnh',
+            etaText: r.eta_text || 'Giao theo chuyến trong ngày'
+          }));
+          freshState.pinnedProductId = freshState.products[0].id;
+        }
+
+        if (posts && posts.length > 0) {
+          freshState.showcasePosts = posts.map((r) => ({
+            id: r.id,
+            merchant: r.merchant,
+            time: r.time_label || 'Vừa cập nhật',
+            badge: r.badge || '🎬 Video tại vựa',
+            title: r.title,
+            desc: r.description || '',
+            productId: r.product_id || freshState.products[0]?.id || 'SP-01',
+            imageUrl: r.image_url || 'https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?auto=format&fit=crop&w=800&q=80',
+            videoUrl: r.video_url || ''
+          }));
+        }
+
+        if (chats && chats.length > 0) {
+          freshState.liveChatMessages = chats.map((r) => ({
+            sender: r.sender,
+            isHost: Boolean(r.is_host),
+            text: r.message
+          }));
+        }
+
+        if (orders && orders.length > 0) {
+          freshState.merchantOrders = orders.map((r) => ({
+            id: r.id,
+            customerName: r.customer_name,
+            customerPhone: r.customer_phone,
+            itemsSummary: r.items_summary,
+            route: r.route || 'Quảng Ninh → Hà Nội',
+            deliveryTarget: r.delivery_target || '🚏 Trạm đón khách',
+            foodAmount: Number(r.food_amount) || 0,
+            freightAmount: Number(r.freight_amount) || 0,
+            paidStatus: r.paid_status || 'Đã thanh toán VietQR 100%',
+            foamSealed: Boolean(r.foam_sealed),
+            dispatchedToBus: Boolean(r.dispatched_to_bus)
+          }));
+        }
+
+        renderAllFreshViews();
+      } catch (err) {
+        console.warn('Tải dữ liệu Supabase cảnh báo:', err);
+      }
+    }
+
+    function subscribeFreshRealtime() {
+      if (!freshState.supabaseClient) return;
+      freshState.supabaseClient
+        .channel('vivu-fresh-live-sync')
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'fresh_live_chats' }, (payload) => {
+          const row = payload.new;
+          freshState.liveChatMessages.push({
+            sender: row.sender,
+            isHost: Boolean(row.is_host),
+            text: row.message
+          });
+          renderLiveChatFeed();
+        })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'fresh_products' }, async () => {
+          await loadInitialFreshData();
+        })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'fresh_showcase_posts' }, async () => {
+          await loadInitialFreshData();
+        })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'fresh_orders' }, async () => {
+          await loadInitialFreshData();
+        })
+        .subscribe();
+    }
+
+    function connectSupabaseRealtime(silent = false) {
+      const url = document.getElementById('sbUrlInput').value.trim();
+      const key = document.getElementById('sbKeyInput').value.trim();
+      if (!url || !key) {
+        if (!silent) showToast('⚠️ Vui lòng nhập Publishable Key của Supabase!', 'warning');
+        return;
+      }
+      try {
+        freshState.supabaseClient = window.supabase.createClient(url, key);
+        localStorage.setItem('vivu_sb_publishable_key', key);
+        localStorage.setItem('vivu_supabase_cloud_config_v1', JSON.stringify({ url, anonKey: key }));
+        const badge = document.getElementById('dbConnectionBadge');
+        badge.textContent = '● Live Supabase';
+        badge.className = 'px-2 py-0.5 rounded-full bg-emerald-500 text-white text-[10px] font-extrabold';
+        closeModal('supabaseConfigModal');
+        loadInitialFreshData();
+        subscribeFreshRealtime();
+        if (freshState.isBroadcastingLive) syncLiveSessionToSupabase(true);
+        if (!silent) showToast('✅ Đã kết nối & đồng bộ real-time ViVu Fresh với Supabase!', 'success');
+      } catch (err) {
+        if (!silent) showToast('❌ Không thể kết nối Supabase!', 'warning');
+      }
+    }
+
+    function renderAllFreshViews() {
+      document.getElementById('sidebarVivuXu').textContent = `${freshState.vivuXu.toLocaleString('vi-VN')} Xu`;
+      renderRouteCorridorTabs();
+      renderProductGrid();
+      renderPinnedLiveProduct();
+      renderLiveChatFeed();
+      renderHarvestShowcase();
+      renderMerchantOrders();
+      renderShipmentTracking();
+      updateCartBadge();
+    }
+
+    function openModal(id) {
+      const el = document.getElementById(id);
+      el.classList.remove('hidden');
+      el.classList.add('flex');
+    }
+
+    function closeModal(id) {
+      const el = document.getElementById(id);
+      el.classList.add('hidden');
+      el.classList.remove('flex');
+    }
+
+    function formatVND(num) {
+      return Math.round(num).toLocaleString('vi-VN') + 'đ';
+    }
+
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      const colors = {
+        success: 'bg-emerald-900/95 border-emerald-500 text-white',
+        warning: 'bg-amber-900/95 border-amber-500 text-white',
+        info: 'bg-slate-900/95 border-teal-400 text-white'
+      };
+      toast.className = `pointer-events-auto px-4 py-3 rounded-2xl border shadow-xl text-xs font-semibold backdrop-blur-md transition-all duration-300 ${colors[type] || colors.info}`;
+      toast.textContent = message;
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(-8px)';
+        setTimeout(() => toast.remove(), 300);
+      }, 3600);
+    }
+  </script>
+</body>
+</html>
